@@ -1,0 +1,82 @@
+﻿@layout LoginLayout
+@page "/login"
+@inject IJSRuntime JSRuntime;
+@using Askianoor.AdminPanel.Data
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<div class="limiter text-center">
+    <div class="container-login100">
+        <div class="wrap-login100">
+            <div class="login100-pic js-tilt" data-tilt>
+                <img src="images/Admin.png" />
+            </div>
+
+            <EditForm class="login100-form validate-form" Model="@user" OnValidSubmit="@ValidateUser">
+                <span class="login100-form-title">
+                    Askianoor Admin Panel
+                </span>
+
+                <div class="wrap-input100">
+                    <input class="input100" type="text" @bind="user.Username" placeholder="Username">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100 mr-2">
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                    </span>
+                </div>
+
+                <div class="wrap-input100">
+                    <input class="input100" type="password" @bind="user.Password" placeholder="Password">
+                    <span class="focus-input100"></span>
+                    <span class="symbol-input100 mr-2">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                    </span>
+                </div>
+
+                <div class="container-login100-form-btn">
+                    <button class="login100-form-btn">
+                        Login
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            JSRuntime.InvokeVoidAsync("TitlReady");
+    }
+
+    private User user;
+
+    protected override Task OnInitializedAsync()
+    {
+        user = new User();
+        return base.OnInitializedAsync();
+    }
+
+
+    private async Task<bool> ValidateUser()
+    {
+        Status LoginStatus = ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).ValidateUser(user.Username, user.Password);
+        if (LoginStatus.isSuccesful)
+        {
+            ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Username);
+
+            NavigationManager.NavigateTo("/");
+            await sessionStorage.SetItemAsync("Username", user.Username);
+        }
+        else
+        {
+            return await Task.FromResult(true);
+        }
+        return await Task.FromResult(true);
+    }
+}

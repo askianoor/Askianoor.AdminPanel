@@ -10,14 +10,21 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Askianoor.AdminPanel</title>
+    <title>Askianoor Admin Panel</title>
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+
+    <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Bootstrap/blazorise.bootstrap.css" rel="stylesheet" />
+    @*<link href="_content/Blazored.Modal/blazored-modal.css" rel="stylesheet" />*@
+
     <link href="css/site.css" rel="stylesheet" />
+
 </head>
 <body>
     <app>
-        <component type="typeof(App)" render-mode="ServerPrerendered" />
+        <component type="typeof(App)" render-mode="Server" />
     </app>
 
     <div id="blazor-error-ui">
@@ -31,6 +38,18 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script src="~/js/jquery-3.2.1.min.js"></script>
+    <script src="~/js/tilt.jquery.min.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="~/lib/popper.js/popper.min.js"></script>
+
     <script src="_framework/blazor.server.js"></script>
+
+    <script>
+        function TitlReady() {
+            $('.js-tilt').tilt({ scale: 1.1 });
+        }
+    </script>
+
 </body>
 </html>

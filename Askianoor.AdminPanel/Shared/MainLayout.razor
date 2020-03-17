@@ -1,15 +1,24 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="sidebar">
-    <NavMenu />
-</div>
+<AuthorizeView>
+    <Authorized>
 
-<div class="main">
-    <div class="top-row px-4">
-        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-    </div>
+        <div class="sidebar">
+            <NavMenu />
+        </div>
 
-    <div class="content px-4">
-        @Body
-    </div>
-</div>
+        <div class="main">
+            <div class="top-row px-4">
+                <a href="#" target="_blank">About</a>
+            </div>
+
+            <div class="content bg-light rounded min-vh-100 p-3 m-2">
+                @Body
+            </div>
+        </div>
+
+    </Authorized>
+    <NotAuthorized>
+        <Askianoor.AdminPanel.Pages.RedirectToLogin></Askianoor.AdminPanel.Pages.RedirectToLogin>
+    </NotAuthorized>
+</AuthorizeView>

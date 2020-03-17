@@ -10,6 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Askianoor.AdminPanel.Data;
+using Blazored.SessionStorage;
+using Blazorise;
+using Blazorise.Bootstrap;
+using Blazorise.Icons.FontAwesome;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Askianoor.AdminPanel
 {
@@ -29,6 +34,18 @@ namespace Askianoor.AdminPanel
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+            //Inject AppSettings
+            services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
+
+            services.AddCors();
+            services.AddBlazoredSessionStorage();
+
+            services.AddBlazorise(options => { options.ChangeTextOnKeyPress = true; })
+                .AddBootstrapProviders()
+                .AddFontAwesomeIcons();
+
+            services.AddScoped<AuthenticationStateProvider, AskianoorAuthenticationStateProvider>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,10 +62,24 @@ namespace Askianoor.AdminPanel
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
+            app.UseCors(builder =>
+                builder.WithOrigins(Configuration["ApplicationSettings:ServerURL"].ToString())
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                );
+
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.ApplicationServices
+              .UseBootstrapProviders()
+              .UseFontAwesomeIcons();
 
             app.UseEndpoints(endpoints =>
             {
