@@ -1,6 +1,7 @@
 ﻿using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Net.Http;
 using System.Security.Claims;
@@ -68,7 +69,7 @@ namespace Askianoor.AdminPanel.Data
 
             using (var client = new HttpClient())
             {
-                var json = JsonSerializer.Serialize(body);
+                var json = JsonConvert.SerializeObject(body);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP GET
@@ -78,6 +79,11 @@ namespace Askianoor.AdminPanel.Data
                 var result = responseTask.Result;
                 if (result.IsSuccessStatusCode)
                 {
+                    var responseString = result.Content.ReadAsStringAsync();
+                    var response = JsonConvert.DeserializeObject<LoginResponse>(responseString.Result);
+
+                    _localStorageService.SetItemAsync("Token", response.accessToken);
+
                     status.isSuccesful = true;
                     status.MessageTitle = "Authentication Succesful";
                     status.MessageDescription = "Welcome to the Admin Panel";
