@@ -1,0 +1,52 @@
+﻿@page "/socialGroups"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data.Models
+@using System.Threading;
+
+@inject NavigationManager NavigationManager
+@*@inject SocialNetworkService SocialNetworkService*@
+
+@*@inject IModalService Modal*@
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@*@inject IJSRuntime JSRuntime;*@
+
+@*@implements IDisposable*@
+
+
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="SocialGroup" Data="@socialGroups" @bind-SelectedRow="@selectedSocialGroup"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" Editable="true" IsStriped="true" IsBordered="true">
+            
+            <DataGridCommandColumn TItem="SocialGroup" />
+
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.SocialId)" Caption="Social ID" />
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Name)" Caption="Social Group Name" />
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Link)" Caption="Social Group Link" />
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Icon)" Caption="Social Group Icon" />
+
+        </DataGrid>
+    </div>
+</div>
+
+
+
+@* <DataGridNumericColumn TItem="SocialNetwork" Field="@nameof(SocialNetwork.InvoiceDiscount)" Caption="کل تخفیف" />*@
+
+@*<DataGridColumn TItem="Employee" Field="@nameof(Employee.Salary)" Caption="Salary" Editable="true">
+        <DisplayTemplate>
+            @($"{(context as Employee)?.Salary} €")
+        </DisplayTemplate>
+        <EditTemplate>
+            <NumericEdit TValue="decimal" Value="@((decimal)(((CellEditContext)context).CellValue))" ValueChanged="@(v=>((CellEditContext)context).CellValue=v)" />
+        </EditTemplate>
+    </DataGridColumn>*@
+
+@code {
+
+    IEnumerable<SocialGroup> socialGroups = new List<SocialGroup>();
+
+    SocialGroup selectedSocialGroup = new SocialGroup();
+
+}
