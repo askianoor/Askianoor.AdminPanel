@@ -1,0 +1,131 @@
+﻿@page "/skills"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+@using System.Threading;
+
+@inject NavigationManager NavigationManager
+@inject SkillService SkillService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+
+<div class="row">
+    <h3>Skills</h3>
+    <div class="col col-auto">
+        <DataGrid TItem="Skill" Data="@skills" @bind-SelectedRow="@selectedSkill"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="Skill" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="Skill" Field="@nameof(Skill.SkillId)" Caption="Skill ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="Skill" Field="@nameof(Skill.Name)" Caption="Skill Name" Editable="true" />
+            <DataGridColumn TItem="Skill" Field="@nameof(Skill.Level)" Caption="Skill Level" Editable="true" />
+            <DataGridColumn TItem="Skill" Field="@nameof(Skill.cssClass)" Caption="Skill Class" Editable="true" />
+            <DataGridNumericColumn TItem="Skill" Field="@nameof(Skill.Group)" Caption="Skill Column Group" Editable="true" />
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<Skill> skills = new List<Skill>();
+
+    Skill selectedSkill = new Skill();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetSkillsData();
+        return base.OnInitializedAsync();
+    }
+
+    protected async void GetSkillsData()
+    {
+        skills = await SkillService.GetSkills();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<Skill, Dictionary<string, object>> e)
+    {
+        var skill = e.Item;
+        var test = e.Item.SkillId;
+
+        e.Values["SkillId"] = await SkillService.AddSkill(skill);
+        if ((Guid)e.Values["SkillId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            skills.Add(e.Item);
+
+        GetSkillsData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<Skill, Dictionary<string, object>> e)
+    {
+        var skill = new Skill(e.Item);
+
+        skill.Name = (string)e.Values["Name"];
+        skill.Level = (string)e.Values["Level"];
+        skill.cssClass = (string)e.Values["cssClass"];
+        skill.Group = (int)e.Values["Group"];
+
+        if (await SkillService.UpdateSkill(skill))
+        {
+            // Todo : Show message Done
+            GetSkillsData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<Skill> model)
+    {
+        if (skills.Contains(model.Item))
+        {
+            if (await SkillService.RemoveSkill(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                skills.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetSkillsData();
+
+        }
+
+    }
+
+}
