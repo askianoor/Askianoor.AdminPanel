@@ -13,10 +13,11 @@
 
 @*@implements IDisposable*@
 
-                  @*RowInserted="OnRowInserted"*@
+@*RowInserted="OnRowInserted"*@
 
+
+<h3>Social Networks</h3>
 <div class="row">
-    <h3>Social Networks</h3>
     <div class="col col-auto">
         <DataGrid TItem="SocialGroup" Data="@socialGroups" @bind-SelectedRow="@selectedSocialGroup"
                   RowInserting="OnRowInserting"
@@ -132,7 +133,7 @@
         {
             if (await SocialNetworkService.RemoveSocialGroups(model.Item))
             {
-                // Todo : Done  
+                // Todo : Done
                 model.Cancel = false;
                 socialGroups.Remove(model.Item);
 
@@ -141,7 +142,7 @@
             {
                 model.Cancel = true;
             }
-            
+
             GetSocialGroupsData();
 
         }

@@ -10,9 +10,8 @@
 
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 
-
+<h3>Skills</h3>
 <div class="row">
-    <h3>Skills</h3>
     <div class="col col-auto">
         <DataGrid TItem="Skill" Data="@skills" @bind-SelectedRow="@selectedSkill"
                   RowInserting="OnRowInserting"
