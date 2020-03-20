@@ -1,30 +1,56 @@
 ﻿@page "/socialGroups"
 @attribute [Authorize]
 
+@using Askianoor.AdminPanel.Data
 @using Askianoor.AdminPanel.Data.Models
 @using System.Threading;
 
 @inject NavigationManager NavigationManager
-@*@inject SocialNetworkService SocialNetworkService*@
-
+@inject SocialNetworkService SocialNetworkService
 @*@inject IModalService Modal*@
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
 @*@inject IJSRuntime JSRuntime;*@
 
 @*@implements IDisposable*@
 
+                  @*RowInserted="OnRowInserted"*@
 
 <div class="row">
     <div class="col col-auto">
         <DataGrid TItem="SocialGroup" Data="@socialGroups" @bind-SelectedRow="@selectedSocialGroup"
-                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" Editable="true" IsStriped="true" IsBordered="true">
-            
-            <DataGridCommandColumn TItem="SocialGroup" />
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
 
-            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.SocialId)" Caption="Social ID" />
-            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Name)" Caption="Social Group Name" />
-            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Link)" Caption="Social Group Link" />
-            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Icon)" Caption="Social Group Icon" />
+            @*<DataGridCommandColumn TItem="SocialGroup" />*@
+
+            <DataGridCommandColumn TItem="SocialGroup" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.SocialId)" Caption="Social ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Name)" Caption="Social Group Name" Editable="true" />
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Link)" Caption="Social Group Link" Editable="true" />
+            <DataGridColumn TItem="SocialGroup" Field="@nameof(SocialGroup.Icon)" Caption="Social Group Icon" Editable="true" />
 
         </DataGrid>
     </div>
@@ -45,8 +71,80 @@
 
 @code {
 
-    IEnumerable<SocialGroup> socialGroups = new List<SocialGroup>();
+    List<SocialGroup> socialGroups = new List<SocialGroup>();
 
     SocialGroup selectedSocialGroup = new SocialGroup();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetSocialGroupsData();
+        return base.OnInitializedAsync();
+    }
+
+    protected async void GetSocialGroupsData()
+    {
+        socialGroups = await SocialNetworkService.GetSocialGroups();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<SocialGroup, Dictionary<string, object>> e)
+    {
+        var SocialGroup = e.Item;
+        var test = e.Item.SocialId;
+
+        e.Values["SocialId"] = await SocialNetworkService.AddSocialGroups(SocialGroup);
+        if ((Guid)e.Values["SocialId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            socialGroups.Add(e.Item);
+
+        GetSocialGroupsData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<SocialGroup, Dictionary<string, object>> e)
+    {
+        var SocialGroup = new SocialGroup(e.Item);
+
+        SocialGroup.Name = (string)e.Values["Name"];
+        SocialGroup.Link = (string)e.Values["Link"];
+        SocialGroup.Icon = (string)e.Values["Icon"];
+
+        if (await SocialNetworkService.UpdateSocialGroups(SocialGroup))
+        {
+            // Todo : Show message Done
+            GetSocialGroupsData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+
+        //employee.DateOfBirth = (DateTime?)e.Values["DateOfBirth"];
+        //employee.Childrens = (int?)e.Values["Childrens"];
+        //employee.Salary = (decimal)e.Values["Salary"];
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<SocialGroup> model)
+    {
+        if (socialGroups.Contains(model.Item))
+        {
+            if (await SocialNetworkService.RemoveSocialGroups(model.Item))
+            {
+                // Todo : Done  
+                model.Cancel = false;
+                socialGroups.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+            
+            GetSocialGroupsData();
+
+        }
+
+    }
 
 }

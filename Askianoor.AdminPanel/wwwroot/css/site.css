@@ -484,6 +484,7 @@ app {
 
 .main {
     flex: 1;
+    min-height: 100% !important;
 }
 
     .main .top-row {
@@ -554,7 +555,8 @@ app {
             }
 
 .content {
-    padding-top: 1.1rem;
+    /*padding-top: 1.1rem;*/
+    min-height: 97.5%;
 }
 
 .navbar-toggler {

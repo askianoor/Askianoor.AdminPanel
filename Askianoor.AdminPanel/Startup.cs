@@ -35,6 +35,8 @@ namespace Askianoor.AdminPanel
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
+            services.AddScoped<SocialNetworkService>();
+
             //Inject AppSettings
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
 
