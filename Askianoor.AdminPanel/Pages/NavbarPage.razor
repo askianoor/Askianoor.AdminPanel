@@ -1,0 +1,127 @@
+﻿@page "/navbars"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+
+@inject NavigationManager NavigationManager
+@inject NavbarService NavbarService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Navbars</h3>
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="Navbar" Data="@navbars" @bind-SelectedRow="@selectedNavbar"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="Navbar" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="Navbar" Field="@nameof(Navbar.MenuId)" Caption="Navbar ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="Navbar" Field="@nameof(Navbar.MenuName)" Caption="Navbar Item Name" Editable="true" />
+            <DataGridNumericColumn TItem="Navbar" Field="@nameof(Navbar.MenuOrder)" Caption="Navbar Order" Editable="true" />
+            <DataGridColumn TItem="Navbar" Field="@nameof(Navbar.MenuPath)" Caption="Navbar Item Path" Editable="true" />
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<Navbar> navbars = new List<Navbar>();
+
+    Navbar selectedNavbar = new Navbar();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetNavbarsData();
+        return base.OnInitializedAsync();
+    }
+
+    protected async void GetNavbarsData()
+    {
+        navbars = await NavbarService.GetNavbars();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<Navbar, Dictionary<string, object>> e)
+    {
+        var navbar = e.Item;
+
+        e.Values["MenuId"] = await NavbarService.AddNavbar(navbar);
+        if ((Guid)e.Values["MenuId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            navbars.Add(e.Item);
+
+        GetNavbarsData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<Navbar, Dictionary<string, object>> e)
+    {
+        var navbar = new Navbar(e.Item);
+
+        navbar.MenuName = (string)e.Values["MenuName"];
+        navbar.MenuOrder = (int)e.Values["MenuOrder"];
+        navbar.MenuPath = (string)e.Values["MenuPath"];
+
+        if (await NavbarService.UpdateNavbar(navbar))
+        {
+            // Todo : Show message Done
+            GetNavbarsData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<Navbar> model)
+    {
+        if (navbars.Contains(model.Item))
+        {
+            if (await NavbarService.RemoveNavbar(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                navbars.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetNavbarsData();
+
+        }
+
+    }
+
+}

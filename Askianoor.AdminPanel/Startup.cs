@@ -37,6 +37,7 @@ namespace Askianoor.AdminPanel
 
             services.AddScoped<SocialNetworkService>();
             services.AddScoped<SkillService>();
+            services.AddScoped<NavbarService>();
 
             //Inject AppSettings
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));
