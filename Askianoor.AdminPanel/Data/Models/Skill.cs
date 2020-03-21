@@ -10,7 +10,7 @@ namespace Askianoor.AdminPanel.Data.Models
         public Guid SkillId { get; set; }
 
         public string Name { get; set; }
-        public string Level { get; set; }
+        public int Level { get; set; }
         public string cssClass { get; set; }
         public int Group { get; set; }
 
@@ -18,7 +18,7 @@ namespace Askianoor.AdminPanel.Data.Models
         {
             SkillId = new Guid();
             Name = "";
-            Level = "";
+            Level = 0;
             cssClass = "";
             Group = 0;
         }

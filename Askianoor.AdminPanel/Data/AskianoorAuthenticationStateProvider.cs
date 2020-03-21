@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -19,7 +20,7 @@ namespace Askianoor.AdminPanel.Data
         private readonly ISessionStorageService _localStorageService;
         private readonly ApplicationSettings _appSettings;
 
-        public AskianoorAuthenticationStateProvider(ISessionStorageService localStorageService, IOptions<ApplicationSettings> appSettings) 
+        public AskianoorAuthenticationStateProvider(ISessionStorageService localStorageService, IOptions<ApplicationSettings> appSettings)
         {
             _localStorageService = localStorageService;
             _appSettings = appSettings.Value;
@@ -28,8 +29,9 @@ namespace Askianoor.AdminPanel.Data
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var savedUser = await _localStorageService.GetItemAsync<string>("Username");
+            var savedToken = await _localStorageService.GetItemAsync<string>("Token");
 
-            if (string.IsNullOrWhiteSpace(savedUser))
+            if (string.IsNullOrWhiteSpace(savedUser) || string.IsNullOrWhiteSpace(savedToken))
             {
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
@@ -49,6 +51,7 @@ namespace Askianoor.AdminPanel.Data
         public void MarkUserAsLoggedOut()
         {
             _localStorageService.RemoveItemAsync("Username");
+            _localStorageService.RemoveItemAsync("Token");
             var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
             var authState = Task.FromResult(new AuthenticationState(anonymousUser));
             NotifyAuthenticationStateChanged(authState);
@@ -83,6 +86,7 @@ namespace Askianoor.AdminPanel.Data
                     var response = JsonConvert.DeserializeObject<LoginResponse>(responseString.Result);
 
                     _localStorageService.SetItemAsync("Token", response.accessToken);
+                    _localStorageService.SetItemAsync("Username", Username);
 
                     status.isSuccesful = true;
                     status.MessageTitle = "Authentication Succesful";

@@ -43,7 +43,7 @@
 
             @*<DataGridColumn TItem="Skill" Field="@nameof(Skill.SkillId)" Caption="Skill ID" Editable="false" Filterable="false" Readonly="true" />*@
             <DataGridColumn TItem="Skill" Field="@nameof(Skill.Name)" Caption="Skill Name" Editable="true" />
-            <DataGridColumn TItem="Skill" Field="@nameof(Skill.Level)" Caption="Skill Level" Editable="true" />
+            <DataGridNumericColumn TItem="Skill" Field="@nameof(Skill.Level)" Caption="Skill Level" Editable="true" />
             <DataGridColumn TItem="Skill" Field="@nameof(Skill.cssClass)" Caption="Skill Class" Editable="true" />
             <DataGridNumericColumn TItem="Skill" Field="@nameof(Skill.Group)" Caption="Skill Column Group" Editable="true" />
 
@@ -73,7 +73,6 @@
     protected async void OnRowInserting(CancellableRowChange<Skill, Dictionary<string, object>> e)
     {
         var skill = e.Item;
-        var test = e.Item.SkillId;
 
         e.Values["SkillId"] = await SkillService.AddSkill(skill);
         if ((Guid)e.Values["SkillId"] == Guid.Empty)
@@ -89,7 +88,7 @@
         var skill = new Skill(e.Item);
 
         skill.Name = (string)e.Values["Name"];
-        skill.Level = (string)e.Values["Level"];
+        skill.Level = (int)e.Values["Level"];
         skill.cssClass = (string)e.Values["cssClass"];
         skill.Group = (int)e.Values["Group"];
 

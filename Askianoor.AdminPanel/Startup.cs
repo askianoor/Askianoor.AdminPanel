@@ -35,6 +35,7 @@ namespace Askianoor.AdminPanel
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
+            services.AddScoped<DashboardSettingService>();
             services.AddScoped<SocialNetworkService>();
             services.AddScoped<SkillService>();
             services.AddScoped<NavbarService>();
@@ -49,7 +50,11 @@ namespace Askianoor.AdminPanel
                 .AddBootstrapProviders()
                 .AddFontAwesomeIcons();
 
+            services.AddAuthorizationCore();
+            
+            //services.AddHttpClient<AuthenticationStateProvider, AskianoorAuthenticationStateProvider>();
             services.AddScoped<AuthenticationStateProvider, AskianoorAuthenticationStateProvider>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

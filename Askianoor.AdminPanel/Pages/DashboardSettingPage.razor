@@ -1,0 +1,254 @@
+﻿@page "/dashboardSetting"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+@inject NavigationManager NavigationManager
+@inject DashboardSettingService DashboardSettingService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Dashboard Settings</h3>
+<div class="row p-3">
+    <div class="col col-12">
+
+        <Validations @ref="validations" Mode="ValidationMode.Manual">
+            @*Model="@DashboardSetting"*@
+
+            <Tabs SelectedTabChanged="@OnSelectedTabChanged" IsPills="true">
+                <Tab Name="Website" IsActive="@(selectedTabName == "Website")">Website</Tab>
+                <Tab Name="HomePage" IsActive="@(selectedTabName == "HomePage")">Home Page</Tab>
+                <Tab Name="Owner" IsActive="@(selectedTabName == "Owner")">Owner</Tab>
+                <Tab Name="AboutMe" IsActive="@(selectedTabName == "AboutMe")">About Me</Tab>
+                <Tab Name="Footer" IsActive="@(selectedTabName == "Footer")">Footer</Tab>
+            </Tabs>
+            <TabsContent @ref="tabContent" Class="p-3">
+
+                <TabPanel IsActive="@(selectedTabName == "Website")">
+
+                    <Field>
+                        <FieldLabel>Website Title</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Placeholder="Enter Website Title" @bind-Text="@DashboardSetting.WebsiteTitle">
+                                    <Feedback>
+                                        <ValidationError />
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>Website Header</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <MemoEdit Rows="5" Placeholder="Enter Website Header" @bind-Text="@DashboardSetting.WebsiteHeader">
+                                    <Feedback>
+                                        <ValidationError />
+                                    </Feedback>
+                                </MemoEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
+                </TabPanel>
+                <TabPanel IsActive="@(selectedTabName == "HomePage")">
+                    Cillum ad ut irure tempor velit nostrud occaecat ullamco aliqua anim Lorem sint. Veniam sint duis incididunt do esse magna mollit excepteur laborum qui. Id id reprehenderit sit est eu aliqua occaecat quis et velit excepteur laborum mollit dolore eiusmod. Ipsum dolor in occaecat commodo et voluptate minim reprehenderit mollit pariatur. Deserunt non laborum enim et cillum eu deserunt excepteur ea incididunt minim occaecat.
+                </TabPanel>
+                <TabPanel IsActive="@(selectedTabName == "Owner")">
+                    Culpa dolor voluptate do laboris laboris irure reprehenderit id incididunt duis pariatur mollit aute magna pariatur consectetur. Eu veniam duis non ut dolor deserunt commodo et minim in quis laboris ipsum velit id veniam. Quis ut consectetur adipisicing officia excepteur non sit. Ut et elit aliquip labore Lorem enim eu. Ullamco mollit occaecat dolore ipsum id officia mollit qui esse anim eiusmod do sint minim consectetur qui.
+                </TabPanel>
+                <TabPanel IsActive="@(selectedTabName == "AboutMe")">
+                    <BlazoredTextEditor @ref="@QuillHtmlAboutMe">
+                        <ToolbarContent>
+                            <select class="ql-header">
+                                <option selected=""></option>
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value="4"></option>
+                                <option value="5"></option>
+                            </select>
+                            <span class="ql-formats">
+                                <button class="ql-bold"></button>
+                                <button class="ql-italic"></button>
+                                <button class="ql-underline"></button>
+                                <button class="ql-strike"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-color"></select>
+                                <select class="ql-background"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-link"></button>
+                            </span>
+                        </ToolbarContent>
+                        <EditorContent>
+                        </EditorContent>
+                    </BlazoredTextEditor>
+                </TabPanel>
+                <TabPanel IsActive="@(selectedTabName == "Footer")">
+                    Eu dolore ea ullamco dolore Lorem id cupidatat excepteur reprehenderit consectetur elit id dolor proident in cupidatat officia. Voluptate excepteur commodo labore nisi cillum duis aliqua do. Aliqua amet qui mollit consectetur nulla mollit velit aliqua veniam nisi id do Lorem deserunt amet. Culpa ullamco sit adipisicing labore officia magna elit nisi in aute tempor commodo eiusmod.
+                </TabPanel>
+            </TabsContent>
+
+
+
+            <Field IsHorizontal="true" JustifyContent="JustifyContent.Start">
+                <FieldLabel ColumnSize="ColumnSize.Is2"></FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is10">
+                    <Button Color="Color.Success" Clicked="@updateDashboardSettings">Update Dashboard Settings</Button>
+                </FieldBody>
+            </Field>
+            @*<button type="submit" disabled="@_formInvalid">Update Dashboard Settings</button>*@
+
+        </Validations>
+
+    </div>
+</div>
+
+
+@code {
+
+    DashboardSetting DashboardSetting = new DashboardSetting();
+
+    BlazoredTextEditor QuillHtmlAboutMe;
+    string QuillHTMLContent;
+
+    private string selectedTabName = "Website";
+    private TabsContent tabContent;
+
+    Validations validations;
+
+    protected override Task OnInitializedAsync()
+    {
+        GetDashboardSettingsData();
+        return base.OnInitializedAsync();
+    }
+
+    private void OnSelectedTabChanged( string name )
+    {
+        selectedTabName = name;
+        tabContent.SelectPanel( name );
+    }
+
+    public async void GetAboutMeHTML()
+    {
+        QuillHTMLContent = await this.QuillHtmlAboutMe.GetHTML();
+        StateHasChanged();
+    }
+
+    //public async void SetAboutMeHTML()
+    //{
+    //    string QuillContent = DashboardSetting.AboutMeDescription;
+    //    if (!string.IsNullOrEmpty(QuillContent))
+    //    {
+    //        await this.QuillHtmlAboutMe.LoadHTMLContent(QuillContent);
+    //        StateHasChanged();
+    //    }
+    //}
+
+
+    protected async void GetDashboardSettingsData()
+    {
+        DashboardSetting = await DashboardSettingService.GetDashboardSettings();
+        if (DashboardSetting != null)
+        {
+            if (!string.IsNullOrEmpty(DashboardSetting.AboutMeDescription))
+            {
+                //await this.QuillHtmlAboutMe.LoadHTMLContent(DashboardSetting.AboutMeDescription);
+            }
+            StateHasChanged();
+        }
+    }
+
+    void updateDashboardSettings()
+    {
+
+        if (validations.ValidateAll())
+        {
+            // TODO : happy
+        }
+        else
+        {
+            // TODO : sad
+        }
+    }
+
+    protected async void OnRowUpdating(DashboardSetting dashboardSetting)
+    {
+
+        if (await DashboardSettingService.UpdateDashboardSetting(dashboardSetting))
+        {
+            // Todo : Show message Done
+            GetDashboardSettingsData();
+        }
+        else
+        {
+            // Todo : Show Failed message 
+        }
+    }
+
+    //protected async void OnRowInserting(CancellableRowChange<DashboardSetting, Dictionary<string, object>> e)
+    //{
+    //    var dashboardSetting = e.Item;
+
+    //    e.Values["Id"] = await DashboardSettingService.AddDashboardSetting(dashboardSetting);
+    //    if ((int)e.Values["Id"] == 0)
+    //        e.Cancel = true;
+    //    else
+    //        dashboardSettings.Add(e.Item);
+
+    //    GetDashboardSettingsData();
+    //}
+
+    //protected async void OnRowUpdating(CancellableRowChange<DashboardSetting, Dictionary<string, object>> e)
+    //{
+    //    var dashboardSetting = new DashboardSetting(e.Item);
+
+    //    dashboardSetting.Name = (string)e.Values["Name"];
+    //    dashboardSetting.Level = (int)e.Values["Level"];
+    //    dashboardSetting.cssClass = (string)e.Values["cssClass"];
+    //    dashboardSetting.Group = (int)e.Values["Group"];
+
+    //    if (await DashboardSettingService.UpdateDashboardSetting(dashboardSetting))
+    //    {
+    //        // Todo : Show message Done
+    //        GetDashboardSettingsData();
+    //        e.Cancel = false;
+    //    }
+    //    else
+    //    {
+    //        e.Cancel = true;
+    //    }
+    //}
+
+    //protected async void OnRowRemoving(CancellableRowChange<DashboardSetting> model)
+    //{
+    //    if (dashboardSettings.Contains(model.Item))
+    //    {
+    //        if (await DashboardSettingService.RemoveDashboardSetting(model.Item))
+    //        {
+    //            // Todo : Done
+    //            model.Cancel = false;
+    //            dashboardSettings.Remove(model.Item);
+
+    //        }
+    //        else
+    //        {
+    //            model.Cancel = true;
+    //        }
+
+    //        GetDashboardSettingsData();
+
+    //    }
+
+    //}
+
+}

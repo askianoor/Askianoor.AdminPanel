@@ -70,8 +70,7 @@
         {
             ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Username);
 
-            NavigationManager.NavigateTo("/");
-            await sessionStorage.SetItemAsync("Username", user.Username);
+            NavigationManager.NavigateTo("/");      
         }
         else
         {
