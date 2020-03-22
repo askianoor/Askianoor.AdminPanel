@@ -53,7 +53,6 @@ namespace Askianoor.AdminPanel.Data
             return null;
         }
 
-
         public async Task<int> AddDashboardSetting(DashboardSetting dashboardSetting)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
@@ -107,7 +106,6 @@ namespace Askianoor.AdminPanel.Data
             }
             return false;
         }
-
 
         public async Task<bool> RemoveDashboardSetting(DashboardSetting dashboardSetting)
         {

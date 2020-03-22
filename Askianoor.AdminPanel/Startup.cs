@@ -33,8 +33,8 @@ namespace Askianoor.AdminPanel
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
 
+            services.AddScoped<GeneralService>();
             services.AddScoped<DashboardSettingService>();
             services.AddScoped<SocialNetworkService>();
             services.AddScoped<SkillService>();

@@ -1,0 +1,238 @@
+﻿@page "/filemanager"
+@attribute [Authorize]
+
+@using System.IO
+@using System.Collections;
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+@inject NavigationManager NavigationManager
+@inject GeneralService GeneralService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+
+<h3>Image File Manager</h3>
+
+<div class="row p-3">
+    <div class="col">
+
+        <RadzenUpload ChooseText="Upload Files" Multiple="true"
+                      Accept="image/*"
+                      Url=@($"{APIAdd}/upload/multiple?CurrentDirectory={CurrentDirectory}")
+                      Style="margin-bottom: 20px;height: 45px"
+                      Progress="@((args) => OnProgress(args))" />
+
+
+        <RadzenButton Disabled="@(SelectedFile.FileName == null)"
+                      Text="Delete File"
+                      Click="DeleteSelectedFile"
+                      ButtonStyle="ButtonStyle.Danger"
+                      Style="margin-bottom: 20px;height: 35px" />
+
+        @*<RadzenUpload ChooseText="Upload Files" Multiple="true"
+        Accept="image/*"
+        Url=@($"/api/upload/multiple?CurrentDirectory={CurrentDirectory}")
+        Style="margin-bottom: 20px;height: 45px"
+        Progress="@((args) => OnProgress(args))" />*@
+    </div>
+</div>
+
+@if (ShowPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Upload Status</h4>
+                </div>
+                <div align="center">
+                    <RadzenProgressBar Value="@progress"
+                                       Unit="@info"
+                                       Visible="@(progress > 0)"
+                                       Style="margin-bottom: 20px" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="row p-3">
+    <div class="col col-md-4" style="margin-bottom: 16px">
+        <RadzenTree Change="@LogChange"
+                    Data="@Directories"
+                    Expand="@LoadDirectory"
+                    Style="width: 100%; height: 300px">
+            <RadzenTreeLevel Text="@GetTextForNode" Template="@FileOrFolderTemplate" />
+        </RadzenTree>
+    </div>
+    <div class="col col-md-8" style="margin-bottom: 16px">
+        <RadzenDataList WrapItems="true" AllowPaging="true"
+                        Data="@Files" TItem="FileObject">
+            <Template Context="file">
+                @if (file.FileName == SelectedFile.FileName)
+                {
+                    <RadzenImage Path="@file.FilePath"
+                                 Style="width:100px;
+                                        padding:10px;
+                                        background-color:darkgrey"
+                                 Click="@((args) => SelectImage(file))" />
+                }
+                else
+                {
+                    <RadzenImage Path="@file.FilePath"
+                                 Style="width: 100px;
+                                        padding: 10px;
+                                        background-color: white"
+                                 Click="@((args) => SelectImage(file))" />
+                }
+            </Template>
+        </RadzenDataList>
+    </div>
+</div>
+
+@code {
+
+    bool ShowPopup = false;
+    bool ShowFolderPopup = false;
+    int progress;
+
+    string info;
+    string CurrentDirectory = "";
+    string CurrentRoot = "";
+    string NewFolderName = "";
+    string APIAdd = "";
+
+    FileObject SelectedFile = new FileObject();
+    List<string> Directories = new List<string>();
+    List<FileObject> Files = new List<FileObject>();
+    Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
+
+
+    protected override void OnInitialized()
+    {
+        APIAdd = GeneralService.GetStringAPI();
+
+        CurrentRoot = Path.Combine(HostEnvironment.WebRootPath, "uploads");
+
+        CurrentDirectory = CurrentRoot;
+        Directories.Add(CurrentDirectory);
+
+        LoadFiles();
+    }
+
+    // Files
+    void SelectImage(FileObject file)
+    {
+        if (SelectedFile.FileName == file.FileName)
+        {
+            SelectedFile = new FileObject();
+        }
+        else
+        {
+            SelectedFile = file;
+        }
+    }
+
+    void LogChange(TreeEventArgs args)
+    {
+        CurrentDirectory = args.Value as string;
+        LoadFiles();
+    }
+
+    string GetTextForNode(object data)
+    {
+        return Path.GetFileName((string)data);
+    }
+
+    RenderFragment<RadzenTreeItem> FileOrFolderTemplate = (context) => builder =>
+    {
+        string path = context.Value as string;
+        bool isDirectory = Directory.Exists(path);
+        builder.OpenComponent<RadzenIcon>(0);
+        builder.AddAttribute(1, "Icon", isDirectory ? "folder" : "insert_drive_file");
+
+        if (!isDirectory)
+        {
+            builder.AddAttribute(2, "Style", "margin-left: 24px");
+        }
+        builder.CloseComponent();
+        builder.AddContent(3, context.Text);
+    };
+
+    void LoadDirectory(TreeExpandEventArgs args)
+    {
+        CurrentDirectory = args.Value as string;
+        // Only get the folders not the files
+        args.Children.Data = Directory.GetDirectories(CurrentDirectory);
+        args.Children.Text = GetTextForNode;
+        args.Children.HasChildren =
+            (path) => Directory.Exists((string)path);
+        args.Children.Template = FileOrFolderTemplate;
+    }
+
+    void LoadFiles()
+    {
+        Files = new List<FileObject>();
+        var FileNames = Directory.GetFiles(CurrentDirectory);
+
+        foreach (var item in FileNames)
+        {
+            Files.Add(new FileObject()
+            {
+                FileName = Path.GetFileName(item),
+                FilePath = item.Replace(HostEnvironment.WebRootPath, "")
+            });
+        }
+
+        // Reset selected file
+        SelectedFile = new FileObject();
+
+        StateHasChanged();
+    }
+
+    async void OnProgress(UploadProgressArgs args)
+    {
+        ShowPopup = true;
+        this.info = $"{args.Loaded} of {args.Total} bytes.";
+        this.progress = args.Progress;
+        StateHasChanged();
+        if (args.Loaded == args.Total)
+        {
+            // Delay to give files time to be saved
+            // before reloading file view
+            await LoadFilesAsync();
+        }
+    }
+    public async Task LoadFilesAsync()
+    {
+        int Time = 1;
+        while (Time > 0)
+        {
+            Time--;
+            StateHasChanged();
+            await Task.Delay(1000);
+        }
+        ShowPopup = false;
+        LoadFiles();
+    }
+
+
+    void DeleteSelectedFile()
+    {
+        string RequestedPath = SelectedFile.FilePath;
+        RequestedPath = 
+            RequestedPath.Replace("\\uploads\\", "uploads\\");
+        string path = Path.Combine(
+            HostEnvironment.WebRootPath,
+            RequestedPath);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            LoadFiles();
+        }
+    }
+
+}

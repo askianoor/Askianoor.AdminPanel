@@ -33,7 +33,8 @@
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <TextEdit Placeholder="Enter Website Title" @bind-Text="@DashboardSetting.WebsiteTitle">
                                     <Feedback>
-                                        <ValidationError />
+                                        <ValidationNone>Please enter a valid Website Title</ValidationNone>
+                                        <ValidationError>Please enter a valid Website Title!</ValidationError>
                                     </Feedback>
                                 </TextEdit>
                             </Validation>
@@ -46,7 +47,8 @@
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <MemoEdit Rows="5" Placeholder="Enter Website Header" @bind-Text="@DashboardSetting.WebsiteHeader">
                                     <Feedback>
-                                        <ValidationError />
+                                        <ValidationNone>Please enter a valid Website Header</ValidationNone>
+                                        <ValidationError>Please enter a valid Website Header!</ValidationError>
                                     </Feedback>
                                 </MemoEdit>
                             </Validation>
@@ -55,10 +57,66 @@
 
                 </TabPanel>
                 <TabPanel IsActive="@(selectedTabName == "HomePage")">
-                    Cillum ad ut irure tempor velit nostrud occaecat ullamco aliqua anim Lorem sint. Veniam sint duis incididunt do esse magna mollit excepteur laborum qui. Id id reprehenderit sit est eu aliqua occaecat quis et velit excepteur laborum mollit dolore eiusmod. Ipsum dolor in occaecat commodo et voluptate minim reprehenderit mollit pariatur. Deserunt non laborum enim et cillum eu deserunt excepteur ea incididunt minim occaecat.
+
+                    <Field>
+                        <FieldLabel>Website Title</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Placeholder="Enter HomePage Text" @bind-Text="@DashboardSetting.HomePageText">
+                                    <Feedback>
+                                        <ValidationNone>Please enter a valid HomePage Text</ValidationNone>
+                                        <ValidationError>Please enter a valid HomePage Text!</ValidationError>
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>Website Header</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Role="TextRole.Url" Placeholder="Enter HomePage Image URL" @bind-Text="@DashboardSetting.HomePageImage">
+                                    <Feedback>
+                                        <ValidationNone>Please enter a valid HomePage Image URL</ValidationNone>
+                                        <ValidationError>Please enter a valid HomePage Image URL!</ValidationError>
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
                 </TabPanel>
                 <TabPanel IsActive="@(selectedTabName == "Owner")">
-                    Culpa dolor voluptate do laboris laboris irure reprehenderit id incididunt duis pariatur mollit aute magna pariatur consectetur. Eu veniam duis non ut dolor deserunt commodo et minim in quis laboris ipsum velit id veniam. Quis ut consectetur adipisicing officia excepteur non sit. Ut et elit aliquip labore Lorem enim eu. Ullamco mollit occaecat dolore ipsum id officia mollit qui esse anim eiusmod do sint minim consectetur qui.
+
+                    <Field>
+                        <FieldLabel>Website Title</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Placeholder="Enter Owner Name" @bind-Text="@DashboardSetting.OwnerName">
+                                    <Feedback>
+                                        <ValidationNone>Please enter a valid Owner Name</ValidationNone>
+                                        <ValidationError>Please enter a valid Owner Name!</ValidationError>
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>Website Header</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@DashboardSetting.OwnerPictureSrc">
+                                    <Feedback>
+                                        <ValidationNone>Please enter a valid Owner Image URL</ValidationNone>
+                                        <ValidationError>Please enter a valid Owner Image URL!</ValidationError>
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
                 </TabPanel>
                 <TabPanel IsActive="@(selectedTabName == "AboutMe")">
                     <BlazoredTextEditor @ref="@QuillHtmlAboutMe">
@@ -90,6 +148,7 @@
                             </span>
                         </ToolbarContent>
                         <EditorContent>
+                            @((MarkupString)DashboardSetting.AboutMeDescription)
                         </EditorContent>
                     </BlazoredTextEditor>
                 </TabPanel>
@@ -100,9 +159,8 @@
 
 
 
-            <Field IsHorizontal="true" JustifyContent="JustifyContent.Start">
-                <FieldLabel ColumnSize="ColumnSize.Is2"></FieldLabel>
-                <FieldBody ColumnSize="ColumnSize.Is10">
+            <Field JustifyContent="JustifyContent.Start">
+                <FieldBody>
                     <Button Color="Color.Success" Clicked="@updateDashboardSettings">Update Dashboard Settings</Button>
                 </FieldBody>
             </Field>
@@ -118,8 +176,8 @@
 
     DashboardSetting DashboardSetting = new DashboardSetting();
 
-    BlazoredTextEditor QuillHtmlAboutMe;
-    string QuillHTMLContent;
+    BlazoredTextEditor QuillHtmlAboutMe = new BlazoredTextEditor();
+    string QuillHTMLContent = "Test";
 
     private string selectedTabName = "Website";
     private TabsContent tabContent;
