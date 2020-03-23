@@ -146,11 +146,16 @@
                             <span class="ql-formats">
                                 <button class="ql-link"></button>
                             </span>
+                            <button class="btn btn-link" id="custom-button"
+                                    @onclick="InsertImageClick">
+                                <i class="fas fa-image" aria-hidden="true"></i>
+                            </button>
                         </ToolbarContent>
                         <EditorContent>
                             @((MarkupString)DashboardSetting.AboutMeDescription)
                         </EditorContent>
                     </BlazoredTextEditor>
+
                 </TabPanel>
                 <TabPanel IsActive="@(selectedTabName == "Footer")">
                     Eu dolore ea ullamco dolore Lorem id cupidatat excepteur reprehenderit consectetur elit id dolor proident in cupidatat officia. Voluptate excepteur commodo labore nisi cillum duis aliqua do. Aliqua amet qui mollit consectetur nulla mollit velit aliqua veniam nisi id do Lorem deserunt amet. Culpa ullamco sit adipisicing labore officia magna elit nisi in aute tempor commodo eiusmod.
@@ -168,6 +173,7 @@
 
         </Validations>
 
+        <FileManagerDialog @ref="FileManagerControl" ImageSelected="InsertImage" />
     </div>
 </div>
 
@@ -183,6 +189,8 @@
     private TabsContent tabContent;
 
     Validations validations;
+
+    private FileManagerDialog FileManagerControl;
 
     protected override Task OnInitializedAsync()
     {
@@ -201,6 +209,18 @@
         QuillHTMLContent = await this.QuillHtmlAboutMe.GetHTML();
         StateHasChanged();
     }
+
+    async Task InsertImage(string paramImageURL)
+    {
+        await this.QuillHtmlAboutMe.InsertImage(paramImageURL);
+        FileManagerControl.SetShowFileManager(false);
+    }
+
+    private void InsertImageClick()
+    {
+        FileManagerControl.SetShowFileManager(true);
+    }
+ 
 
     //public async void SetAboutMeHTML()
     //{
