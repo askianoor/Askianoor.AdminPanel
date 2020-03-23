@@ -11,6 +11,7 @@
     <PackageReference Include="Blazorise.Bootstrap" Version="0.8.8.4" />
     <PackageReference Include="Blazorise.DataGrid" Version="0.8.8.4" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.8.8.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Radzen.Blazor" Version="2.4.0" />
   </ItemGroup>

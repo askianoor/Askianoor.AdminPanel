@@ -94,6 +94,7 @@ namespace Askianoor.AdminPanel
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapControllers();
             });
         }
     }

@@ -18,12 +18,28 @@
 <div class="row p-3">
     <div class="col">
 
+        @*<RadzenUpload ChooseText="Upload Files" Multiple="true"
+            Accept="image/*"
+            Url=@($"{APIAdd}/upload/multiple?CurrentDirectory={CurrentDirectory}")
+            Style="margin-bottom: 20px;height: 45px"
+            Progress="@((args) => OnProgress(args))" />*@
+
         <RadzenUpload ChooseText="Upload Files" Multiple="true"
                       Accept="image/*"
-                      Url=@($"{APIAdd}/upload/multiple?CurrentDirectory={CurrentDirectory}")
+                      Url=@($"/api/upload/multiple?CurrentDirectory={CurrentDirectory}")
                       Style="margin-bottom: 20px;height: 45px"
                       Progress="@((args) => OnProgress(args))" />
 
+
+        <RadzenSplitButton Click="(args) => FolderAction(args)"
+                           Text="Folder"
+                           ButtonStyle="ButtonStyle.Info"
+                           Style="margin-bottom: 20px;height: 35px">
+            <ChildContent>
+                <RadzenSplitButtonItem Text="Add Folder" Value="Add" />
+                <RadzenSplitButtonItem Text="Delete Folder" Value="Delete" />
+            </ChildContent>
+        </RadzenSplitButton>
 
         <RadzenButton Disabled="@(SelectedFile.FileName == null)"
                       Text="Delete File"
@@ -32,10 +48,10 @@
                       Style="margin-bottom: 20px;height: 35px" />
 
         @*<RadzenUpload ChooseText="Upload Files" Multiple="true"
-        Accept="image/*"
-        Url=@($"/api/upload/multiple?CurrentDirectory={CurrentDirectory}")
-        Style="margin-bottom: 20px;height: 45px"
-        Progress="@((args) => OnProgress(args))" />*@
+            Accept="image/*"
+            Url=@($"/api/upload/multiple?CurrentDirectory={CurrentDirectory}")
+            Style="margin-bottom: 20px;height: 45px"
+            Progress="@((args) => OnProgress(args))" />*@
     </div>
 </div>
 
@@ -52,6 +68,33 @@
                                        Unit="@info"
                                        Visible="@(progress > 0)"
                                        Style="margin-bottom: 20px" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (ShowFolderPopup)
+{
+    <div class="modal" tabindex="-1" style="display:block" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">New Folder Name</h4>
+                    <!-- Button to close the popup -->
+                    <button type="button" class="close"
+                            @onclick="CloseFolderPopup">
+                        <span aria-hidden="true">X</span>
+                    </button>
+                </div>
+                <div align="center">
+                    <RadzenTextBox Placeholder="Folder Name"
+                                   @bind-Value="NewFolderName"
+                                   Style="margin-bottom: 20px" />
+                    <RadzenButton Text="Add Folder"
+                                  Click="AddFolderName"
+                                  ButtonStyle="ButtonStyle.Success"
+                                  Style="margin-bottom: 20px;height: 35px" />
                 </div>
             </div>
         </div>
@@ -116,6 +159,11 @@
         APIAdd = GeneralService.GetStringAPI();
 
         CurrentRoot = Path.Combine(HostEnvironment.WebRootPath, "uploads");
+
+        if (!Directory.Exists(CurrentRoot)) 
+        {
+            Directory.CreateDirectory(CurrentRoot);
+        }
 
         CurrentDirectory = CurrentRoot;
         Directories.Add(CurrentDirectory);
@@ -223,7 +271,7 @@
     void DeleteSelectedFile()
     {
         string RequestedPath = SelectedFile.FilePath;
-        RequestedPath = 
+        RequestedPath =
             RequestedPath.Replace("\\uploads\\", "uploads\\");
         string path = Path.Combine(
             HostEnvironment.WebRootPath,
@@ -232,6 +280,62 @@
         {
             File.Delete(path);
             LoadFiles();
+        }
+    }
+
+
+    void AddFolder()
+    {
+        ShowFolderPopup = true;
+    }
+
+    void CloseFolderPopup()
+    {
+        ShowFolderPopup = false;
+    }
+
+    void AddFolderName()
+    {
+        string path = Path.Combine(
+            HostEnvironment.WebRootPath,
+            CurrentDirectory,
+            NewFolderName);
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+            LoadFiles();
+        }
+        NewFolderName = "";
+        ShowFolderPopup = false;
+        StateHasChanged();
+    }
+
+    void FolderAction(RadzenSplitButtonItem item)
+    {
+        if (item != null)
+        {
+            if (item.Value == "Add")
+            {
+                ShowFolderPopup = true;
+            }
+            // Delete
+            if (item.Value == "Delete")
+            {
+                if (CurrentDirectory != CurrentRoot)
+                {
+                    string path = Path.Combine(
+                        HostEnvironment.WebRootPath,
+                        CurrentDirectory);
+                    if (Directory.Exists(path))
+                    {
+                        Directory.Delete(path, true);
+                        CurrentDirectory =
+                            HostEnvironment.WebRootPath;
+                        StateHasChanged();
+                        LoadFiles();
+                    }
+                }
+            }
         }
     }
 
