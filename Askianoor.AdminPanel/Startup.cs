@@ -40,6 +40,7 @@ namespace Askianoor.AdminPanel
             services.AddScoped<SkillService>();
             services.AddScoped<NavbarService>();
             services.AddScoped<EducationService>();
+            services.AddScoped<ExperienceService>();
 
             //Inject AppSettings
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));

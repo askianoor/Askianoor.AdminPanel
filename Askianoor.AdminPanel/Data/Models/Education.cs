@@ -25,6 +25,7 @@ namespace Askianoor.AdminPanel.Data.Models
             universityTitle = "";
             universityAddress = "";
             universityPlace = "";
+            description = "";
             degree = "";
             year = "";
             icon = "";
@@ -37,6 +38,7 @@ namespace Askianoor.AdminPanel.Data.Models
             universityTitle = education.universityTitle;
             universityAddress = education.universityAddress;
             universityPlace = education.universityPlace;
+            description = education.description;
             degree = education.degree;
             year = education.year;
             icon = education.icon;

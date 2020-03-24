@@ -45,6 +45,11 @@
             <DataGridColumn TItem="Education" Field="@nameof(Education.universityTitle)" Caption="University Title" Editable="true" />
             <DataGridColumn TItem="Education" Field="@nameof(Education.universityAddress)" Caption="University Address" Editable="true" />
             <DataGridColumn TItem="Education" Field="@nameof(Education.universityPlace)" Caption="University Place" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.description)" Caption="Description" Editable="true">
+                <EditTemplate>
+                    <MemoEdit Text="@((string)(((CellEditContext)context).CellValue))" TextChanged="@(v=>((CellEditContext)context).CellValue=v)" />
+                </EditTemplate>
+            </DataGridColumn>
             <DataGridColumn TItem="Education" Field="@nameof(Education.degree)" Caption="Education Degree" Editable="true" />
             <DataGridColumn TItem="Education" Field="@nameof(Education.year)" Caption="Education Year" Editable="true" />
             <DataGridColumn TItem="Education" Field="@nameof(Education.icon)" Caption="Icon" Editable="true" />
@@ -93,6 +98,7 @@
         education.universityTitle = (string)e.Values["universityTitle"];
         education.universityAddress = (string)e.Values["universityAddress"];
         education.universityPlace = (string)e.Values["universityPlace"];
+        education.description = (string)e.Values["description"];
         education.degree = (string)e.Values["degree"];
         education.year = (string)e.Values["year"];
         education.icon = (string)e.Values["icon"];

@@ -1,0 +1,137 @@
+﻿@page "/experiences"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+@inject NavigationManager NavigationManager
+@inject ExperienceService ExperienceService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Experiences</h3>
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="Experience" Data="@experiences" @bind-SelectedRow="@selectedExperience"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="Experience" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="Experience" Field="@nameof(Experience.ExperienceId)" Caption="Experience ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.jobTitle)" Caption="Job Title" Editable="true" />
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.companyTitle)" Caption="Company Title" Editable="true" />
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.companyAddress)" Caption="Company Address" Editable="true" />
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.description)" Caption="Description" Editable="true">
+                <EditTemplate>
+                    <MemoEdit Text="@((string)(((CellEditContext)context).CellValue))" TextChanged="@(v=>((CellEditContext)context).CellValue=v)" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.year)" Caption="Experience Year" Editable="true" />
+            <DataGridColumn TItem="Experience" Field="@nameof(Experience.icon)" Caption="Icon" Editable="true" />
+
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<Experience> experiences = new List<Experience>();
+
+    Experience selectedExperience = new Experience();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetExperiencesData();
+        return base.OnInitializedAsync();
+    }
+
+    protected async void GetExperiencesData()
+    {
+        experiences = await ExperienceService.GetExperiences();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<Experience, Dictionary<string, object>> e)
+    {
+        var experience = e.Item;
+
+        e.Values["ExperienceId"] = await ExperienceService.AddExperience(experience);
+        if ((Guid)e.Values["ExperienceId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            experiences.Add(e.Item);
+
+        GetExperiencesData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<Experience, Dictionary<string, object>> e)
+    {
+        var experience = new Experience(e.Item);
+
+        experience.jobTitle = (string)e.Values["jobTitle"];
+        experience.companyTitle = (string)e.Values["companyTitle"];
+        experience.companyAddress = (string)e.Values["companyAddress"];
+        experience.description = (string)e.Values["description"];
+        experience.year = (string)e.Values["year"];
+        experience.icon = (string)e.Values["icon"];
+
+        if (await ExperienceService.UpdateExperience(experience))
+        {
+            // Todo : Show message Done
+            GetExperiencesData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<Experience> model)
+    {
+        if (experiences.Contains(model.Item))
+        {
+            if (await ExperienceService.RemoveExperience(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                experiences.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetExperiencesData();
+
+        }
+
+    }
+
+}
