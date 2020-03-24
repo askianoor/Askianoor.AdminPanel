@@ -146,8 +146,7 @@
                             <span class="ql-formats">
                                 <button class="ql-link"></button>
                             </span>
-                            <button class="btn btn-link" id="custom-button"
-                                    @onclick="InsertImageClick">
+                            <button class="btn btn-link" id="custom-button" @onclick="InsertImageClick">
                                 <i class="fas fa-image" aria-hidden="true"></i>
                             </button>
                         </ToolbarContent>
@@ -156,9 +155,57 @@
                         </EditorContent>
                     </BlazoredTextEditor>
 
+                    <Field>
+                        <FieldLabel>About Me Image</FieldLabel>
+                        <FieldBody>
+                            <Validation Validator="@ValidationRule.IsNotEmpty">
+                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@DashboardSetting.AboutMeImage">
+                                    <Feedback>
+                                        <ValidationNone>Please enter a valid About me Image URL</ValidationNone>
+                                        <ValidationError>Please enter a valid About me Image URL!</ValidationError>
+                                    </Feedback>
+                                </TextEdit>
+                            </Validation>
+                        </FieldBody>
+                    </Field>
+
                 </TabPanel>
                 <TabPanel IsActive="@(selectedTabName == "Footer")">
-                    Eu dolore ea ullamco dolore Lorem id cupidatat excepteur reprehenderit consectetur elit id dolor proident in cupidatat officia. Voluptate excepteur commodo labore nisi cillum duis aliqua do. Aliqua amet qui mollit consectetur nulla mollit velit aliqua veniam nisi id do Lorem deserunt amet. Culpa ullamco sit adipisicing labore officia magna elit nisi in aute tempor commodo eiusmod.
+                    <BlazoredTextEditor @ref="@QuillHtmlFooter">
+                        <ToolbarContent>
+                            <select class="ql-header">
+                                <option selected=""></option>
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value="4"></option>
+                                <option value="5"></option>
+                            </select>
+                            <span class="ql-formats">
+                                <button class="ql-bold"></button>
+                                <button class="ql-italic"></button>
+                                <button class="ql-underline"></button>
+                                <button class="ql-strike"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-color"></select>
+                                <select class="ql-background"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-link"></button>
+                            </span>
+                            <button class="btn btn-link" id="custom-button" @onclick="InsertFooterImageClick">
+                                <i class="fas fa-image" aria-hidden="true"></i>
+                            </button>
+                        </ToolbarContent>
+                        <EditorContent>
+                            @((MarkupString)DashboardSetting.FooterText)
+                        </EditorContent>
+                    </BlazoredTextEditor>
                 </TabPanel>
             </TabsContent>
 
@@ -169,11 +216,12 @@
                     <Button Color="Color.Success" Clicked="@updateDashboardSettings">Update Dashboard Settings</Button>
                 </FieldBody>
             </Field>
-            @*<button type="submit" disabled="@_formInvalid">Update Dashboard Settings</button>*@
 
         </Validations>
 
         <FileManagerDialog @ref="FileManagerControl" ImageSelected="InsertImage" />
+        <FileManagerDialog @ref="FooterFileManagerControl" ImageSelected="InsertFooterImage" />
+
     </div>
 </div>
 
@@ -183,7 +231,7 @@
     DashboardSetting DashboardSetting = new DashboardSetting();
 
     BlazoredTextEditor QuillHtmlAboutMe = new BlazoredTextEditor();
-    string QuillHTMLContent = "Test";
+    BlazoredTextEditor QuillHtmlFooter = new BlazoredTextEditor();
 
     private string selectedTabName = "Website";
     private TabsContent tabContent;
@@ -191,6 +239,9 @@
     Validations validations;
 
     private FileManagerDialog FileManagerControl;
+    private FileManagerDialog FooterFileManagerControl;
+
+    bool rawHtmlFormat = false;
 
     protected override Task OnInitializedAsync()
     {
@@ -206,21 +257,35 @@
 
     public async void GetAboutMeHTML()
     {
-        QuillHTMLContent = await this.QuillHtmlAboutMe.GetHTML();
-        StateHasChanged();
+        DashboardSetting.AboutMeDescription = await this.QuillHtmlAboutMe.GetHTML();
     }
 
-    async Task InsertImage(string paramImageURL)
+    public void HtmlContentToggle()
     {
-        await this.QuillHtmlAboutMe.InsertImage(paramImageURL);
-        FileManagerControl.SetShowFileManager(false);
+        rawHtmlFormat = rawHtmlFormat ? false : true;
     }
 
     private void InsertImageClick()
     {
         FileManagerControl.SetShowFileManager(true);
     }
- 
+    
+    async Task InsertImage(string paramImageURL)
+    {
+        await this.QuillHtmlAboutMe.InsertImage(paramImageURL);
+        FileManagerControl.SetShowFileManager(false);
+    }
+
+    private void InsertFooterImageClick()
+    {
+        FooterFileManagerControl.SetShowFileManager(true);
+    }
+
+    async Task InsertFooterImage(string paramImageURL)
+    {
+        await this.QuillHtmlFooter.InsertImage(paramImageURL);
+        FooterFileManagerControl.SetShowFileManager(false);
+    }
 
     //public async void SetAboutMeHTML()
     //{
@@ -238,10 +303,6 @@
         DashboardSetting = await DashboardSettingService.GetDashboardSettings();
         if (DashboardSetting != null)
         {
-            if (!string.IsNullOrEmpty(DashboardSetting.AboutMeDescription))
-            {
-                //await this.QuillHtmlAboutMe.LoadHTMLContent(DashboardSetting.AboutMeDescription);
-            }
             StateHasChanged();
         }
     }

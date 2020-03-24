@@ -17,5 +17,29 @@ namespace Askianoor.AdminPanel.Data.Models
         public string description { get; set; }
         public string year { get; set; }
         public string icon { get; set; }
+
+        public Education()
+        {
+            EducationId = new Guid();
+            educationTitle = "";
+            universityTitle = "";
+            universityAddress = "";
+            universityPlace = "";
+            degree = "";
+            year = "";
+            icon = "";
+        }
+
+        public Education(Education education)
+        {
+            EducationId = education.EducationId;
+            educationTitle = education.educationTitle;
+            universityTitle = education.universityTitle;
+            universityAddress = education.universityAddress;
+            universityPlace = education.universityPlace;
+            degree = education.degree;
+            year = education.year;
+            icon = education.icon;
+        }
     }
 }

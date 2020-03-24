@@ -1,0 +1,134 @@
+﻿@page "/educations"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+@inject NavigationManager NavigationManager
+@inject EducationService EducationService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Educations</h3>
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="Education" Data="@educations" @bind-SelectedRow="@selectedEducation"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="Education" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="Education" Field="@nameof(Education.EducationId)" Caption="Education ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="Education" Field="@nameof(Education.educationTitle)" Caption="Education Title" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.universityTitle)" Caption="University Title" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.universityAddress)" Caption="University Address" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.universityPlace)" Caption="University Place" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.degree)" Caption="Education Degree" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.year)" Caption="Education Year" Editable="true" />
+            <DataGridColumn TItem="Education" Field="@nameof(Education.icon)" Caption="Icon" Editable="true" />
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<Education> educations = new List<Education>();
+
+    Education selectedEducation = new Education();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetEducationsData();
+        return base.OnInitializedAsync();
+    }
+
+    protected async void GetEducationsData()
+    {
+        educations = await EducationService.GetEducations();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<Education, Dictionary<string, object>> e)
+    {
+        var education = e.Item;
+
+        e.Values["EducationId"] = await EducationService.AddEducation(education);
+        if ((Guid)e.Values["EducationId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            educations.Add(e.Item);
+
+        GetEducationsData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<Education, Dictionary<string, object>> e)
+    {
+        var education = new Education(e.Item);
+
+        education.educationTitle = (string)e.Values["educationTitle"];
+        education.universityTitle = (string)e.Values["universityTitle"];
+        education.universityAddress = (string)e.Values["universityAddress"];
+        education.universityPlace = (string)e.Values["universityPlace"];
+        education.degree = (string)e.Values["degree"];
+        education.year = (string)e.Values["year"];
+        education.icon = (string)e.Values["icon"];
+
+        if (await EducationService.UpdateEducation(education))
+        {
+            // Todo : Show message Done
+            GetEducationsData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<Education> model)
+    {
+        if (educations.Contains(model.Item))
+        {
+            if (await EducationService.RemoveEducation(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                educations.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetEducationsData();
+
+        }
+
+    }
+
+}

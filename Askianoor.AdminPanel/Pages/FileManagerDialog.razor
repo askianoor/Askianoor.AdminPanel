@@ -38,11 +38,13 @@
                                 <RadzenSplitButtonItem Text="Delete Folder" Value="Delete" />
                             </ChildContent>
                         </RadzenSplitButton>
+
                         <RadzenButton Disabled="@(SelectedFile.FileName == null)"
                                       Text="Delete"
                                       Click="DeleteSelectedFile"
                                       ButtonStyle="ButtonStyle.Danger"
                                       Style="margin-bottom: 20px;height: 35px" />
+
                         <RadzenButton Disabled="@(SelectedFile.FileName == null)"
                                       Text="Select"
                                       Click="SelectFile"
@@ -141,8 +143,8 @@
     private FileObject SelectedFile = new FileObject();
     private List<string> Directories = new List<string>();
     private List<FileObject> Files = new List<FileObject>();
-    private Dictionary<DateTime, string> events =
-        new Dictionary<DateTime, string>();
+    private Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
+
     protected override void OnInitialized()
     {
         CurrentRoot =
