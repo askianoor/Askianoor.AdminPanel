@@ -59,7 +59,7 @@
                 <TabPanel IsActive="@(selectedTabName == "HomePage")">
 
                     <Field>
-                        <FieldLabel>Website Title</FieldLabel>
+                        <FieldLabel>HomePage Text</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <TextEdit Placeholder="Enter HomePage Text" @bind-Text="@DashboardSetting.HomePageText">
@@ -73,7 +73,7 @@
                     </Field>
 
                     <Field>
-                        <FieldLabel>Website Header</FieldLabel>
+                        <FieldLabel>HomePage Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <TextEdit Role="TextRole.Url" Placeholder="Enter HomePage Image URL" @bind-Text="@DashboardSetting.HomePageImage">
@@ -90,7 +90,7 @@
                 <TabPanel IsActive="@(selectedTabName == "Owner")">
 
                     <Field>
-                        <FieldLabel>Website Title</FieldLabel>
+                        <FieldLabel>Owner Name</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <TextEdit Placeholder="Enter Owner Name" @bind-Text="@DashboardSetting.OwnerName">
@@ -104,7 +104,7 @@
                     </Field>
 
                     <Field>
-                        <FieldLabel>Website Header</FieldLabel>
+                        <FieldLabel>Owner Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
                                 <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@DashboardSetting.OwnerPictureSrc">
@@ -269,7 +269,7 @@
     {
         FileManagerControl.SetShowFileManager(true);
     }
-    
+
     async Task InsertImage(string paramImageURL)
     {
         await this.QuillHtmlAboutMe.InsertImage(paramImageURL);
@@ -307,16 +307,25 @@
         }
     }
 
-    void updateDashboardSettings()
+    protected async void updateDashboardSettings()
     {
 
         if (validations.ValidateAll())
         {
-            // TODO : happy
+            bool result = await DashboardSettingService.UpdateDashboardSetting(DashboardSetting);
+            if (result)
+            {
+                // TODO : Successful Message
+            }
+            else
+            {
+                // TODO : Failed Message
+            }
+
         }
         else
         {
-            // TODO : sad
+            // TODO : Failed Message
         }
     }
 

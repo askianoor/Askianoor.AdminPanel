@@ -15,6 +15,7 @@ using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components.Authorization;
+using Blazored.Toast;
 
 namespace Askianoor.AdminPanel
 {
@@ -33,6 +34,7 @@ namespace Askianoor.AdminPanel
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddBlazoredToast();
 
             services.AddScoped<GeneralService>();
             services.AddScoped<DashboardSettingService>();

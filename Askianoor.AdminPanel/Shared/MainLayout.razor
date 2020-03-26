@@ -1,17 +1,21 @@
 ﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
 
 <AuthorizeView>
     <Authorized>
+
+        <BlazoredToasts Position="ToastPosition.TopRight"
+                        Timeout="10"
+                        SuccessIconClass="fa fa-thumbs-up"
+                        ErrorIconClass="fa fa-exclamation"
+                        InfoIconClass="fa fa-info-circle"
+                        WarningIconClass="fa fa-exclamation-triangle" />
 
         <div class="sidebar">
             <NavMenu />
         </div>
 
         <div class="main">
-            @*<div class="top-row px-4">
-                <a href="#" target="_blank">About</a>
-            </div>*@
-
             <div class="content bg-light rounded p-3 m-2">
                 @Body
             </div>

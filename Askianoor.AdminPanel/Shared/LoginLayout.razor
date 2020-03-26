@@ -1,4 +1,13 @@
 ﻿@inherits LayoutComponentBase
+@using Blazored.Toast.Configuration
+
+<BlazoredToasts Position="ToastPosition.TopRight"
+                Timeout="10"
+                SuccessIconClass="fa fa-thumbs-up"
+                ErrorIconClass="fa fa-exclamation" 
+                InfoIconClass="fa fa-info-circle"
+                WarningIconClass="fa fa-exclamation-triangle"
+                />
 
 <div class="container">
     <div class="row">

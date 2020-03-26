@@ -6,6 +6,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
 @inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+@inject IToastService toastService
 
 <div class="limiter text-center">
     <div class="container-login100">
@@ -15,12 +16,13 @@
             </div>
 
             <EditForm class="login100-form validate-form" Model="@user" OnValidSubmit="@ValidateUser">
+
                 <span class="login100-form-title">
                     Askianoor Admin Panel
                 </span>
 
                 <div class="wrap-input100">
-                    <input class="input100" type="text" @bind="user.Username" placeholder="Username">
+                    <input class="input100" type="text" @bind="user.Username" placeholder="Username" required>
                     <span class="focus-input100"></span>
                     <span class="symbol-input100 mr-2">
                         <i class="fa fa-user" aria-hidden="true"></i>
@@ -28,7 +30,7 @@
                 </div>
 
                 <div class="wrap-input100">
-                    <input class="input100" type="password" @bind="user.Password" placeholder="Password">
+                    <input class="input100" type="password" @bind="user.Password" placeholder="Password" required>
                     <span class="focus-input100"></span>
                     <span class="symbol-input100 mr-2">
                         <i class="fa fa-lock" aria-hidden="true"></i>
@@ -70,10 +72,12 @@
         {
             ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Username);
 
-            NavigationManager.NavigateTo("/");      
+            NavigationManager.NavigateTo("/");
+            toastService.ShowSuccess(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
         }
         else
         {
+            toastService.ShowError(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
             return await Task.FromResult(true);
         }
         return await Task.FromResult(true);

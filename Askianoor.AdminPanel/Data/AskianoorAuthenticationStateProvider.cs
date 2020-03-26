@@ -63,7 +63,7 @@ namespace Askianoor.AdminPanel.Data
             status.isSuccesful = false;
             status.MessageType = "Danger";
             status.MessageTitle = "Authentication Error";
-            status.MessageTitle = "Please your Username and Password Correctly";
+            status.MessageDescription = "Please enter your Username and Password Correctly!";
 
             if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
                 return status;
