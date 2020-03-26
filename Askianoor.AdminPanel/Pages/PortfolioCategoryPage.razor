@@ -1,0 +1,123 @@
+﻿@page "/portfolioCategorys"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+@using System.Threading;
+
+@inject NavigationManager NavigationManager
+@inject PortfolioCategoryService PortfolioCategoryService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Portfolio Categories</h3>
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="PortfolioCategory" Data="@portfolioCategorys" @bind-SelectedRow="@selectedPortfolioCategory"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="PortfolioCategory" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="PortfolioCategory" Field="@nameof(PortfolioCategory.PortfolioCategoryId)" Caption="PortfolioCategory ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="PortfolioCategory" Field="@nameof(PortfolioCategory.CategoryName)" Caption="Portfolio Category Name" Editable="true" />
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<PortfolioCategory> portfolioCategorys = new List<PortfolioCategory>();
+
+    PortfolioCategory selectedPortfolioCategory = new PortfolioCategory();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetPortfolioCategorysData();
+        return base.OnInitializedAsync();
+    }
+
+    protected void GetPortfolioCategorysData()
+    {
+        portfolioCategorys = PortfolioCategoryService.GetPortfolioCategorys();
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<PortfolioCategory, Dictionary<string, object>> e)
+    {
+        var portfolioCategory = e.Item;
+
+        e.Values["PortfolioCategoryId"] = await PortfolioCategoryService.AddPortfolioCategory(portfolioCategory);
+        if ((Guid)e.Values["PortfolioCategoryId"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            portfolioCategorys.Add(e.Item);
+
+        GetPortfolioCategorysData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<PortfolioCategory, Dictionary<string, object>> e)
+    {
+        var portfolioCategory = new PortfolioCategory(e.Item);
+
+        portfolioCategory.CategoryName = (string)e.Values["CategoryName"];
+
+        if (await PortfolioCategoryService.UpdatePortfolioCategory(portfolioCategory))
+        {
+            // Todo : Show message Done
+            GetPortfolioCategorysData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<PortfolioCategory> model)
+    {
+        if (portfolioCategorys.Contains(model.Item))
+        {
+            if (await PortfolioCategoryService.RemovePortfolioCategory(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                portfolioCategorys.Remove(model.Item);
+
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetPortfolioCategorysData();
+
+        }
+
+    }
+
+}

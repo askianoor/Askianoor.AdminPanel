@@ -51,18 +51,18 @@ namespace Askianoor.AdminPanel.Data
         }
 
 
-        public async Task<Guid> AddNavbar(Navbar skill)
+        public async Task<Guid> AddNavbar(Navbar navbar)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
             if (string.IsNullOrEmpty(Token))
                 return new Guid();
 
-            //var body = new { skill , Token };
+            //var body = new { navbar , Token };
 
             using (var client = new HttpClient())
             {
-                var json = JsonConvert.SerializeObject(skill);
+                var json = JsonConvert.SerializeObject(navbar);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP Post
@@ -80,20 +80,20 @@ namespace Askianoor.AdminPanel.Data
             return new Guid();
         }
 
-        public async Task<bool> UpdateNavbar(Navbar skill)
+        public async Task<bool> UpdateNavbar(Navbar navbar)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
-            if (string.IsNullOrEmpty(Token) || skill.MenuId == Guid.Empty)
+            if (string.IsNullOrEmpty(Token) || navbar.MenuId == Guid.Empty)
                 return false;
 
             using (var client = new HttpClient())
             {
-                var json = JsonConvert.SerializeObject(skill);
+                var json = JsonConvert.SerializeObject(navbar);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP Post
-                var responseTask = client.PutAsync(_appSettings.BaseAPIUri + "/Navbars/" + skill.MenuId, stringContent);
+                var responseTask = client.PutAsync(_appSettings.BaseAPIUri + "/Navbars/" + navbar.MenuId, stringContent);
                 responseTask.Wait();
 
                 var result = responseTask.Result;
@@ -106,17 +106,17 @@ namespace Askianoor.AdminPanel.Data
         }
 
 
-        public async Task<bool> RemoveNavbar(Navbar skill)
+        public async Task<bool> RemoveNavbar(Navbar navbar)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
-            if (string.IsNullOrEmpty(Token) || skill.MenuId == Guid.Empty)
+            if (string.IsNullOrEmpty(Token) || navbar.MenuId == Guid.Empty)
                 return false;
 
             using (var client = new HttpClient())
             {
                 //HTTP Delete
-                var responseTask = client.DeleteAsync(_appSettings.BaseAPIUri + "/Navbars/" + skill.MenuId);
+                var responseTask = client.DeleteAsync(_appSettings.BaseAPIUri + "/Navbars/" + navbar.MenuId);
                 responseTask.Wait();
 
                 var result = responseTask.Result;

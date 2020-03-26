@@ -1,0 +1,201 @@
+﻿@page "/portfolios"
+@attribute [Authorize]
+
+@using Askianoor.AdminPanel.Data
+@using Askianoor.AdminPanel.Data.Models
+
+@inject NavigationManager NavigationManager
+@inject PortfolioService PortfolioService
+@inject PortfolioCategoryService PortfolioCategoryService
+
+@inject Blazored.SessionStorage.ISessionStorageService sessionStorage
+
+<h3>Portfolios</h3>
+<div class="row">
+    <div class="col col-auto">
+        <DataGrid TItem="Portfolio" Data="@portfolios" @bind-SelectedRow="@selectedPortfolio"
+                  RowInserting="OnRowInserting"
+                  RowUpdating="OnRowUpdating"
+                  RowRemoving="OnRowRemoving"
+                  UseInternalEditing="false" Editable="true" EditMode="DataGridEditMode.Form"
+                  Sortable="true" Filterable="true" ShowPager="true" IsHoverable="true" IsStriped="true" IsBordered="true" PageSize="10">
+
+            <DataGridCommandColumn TItem="Portfolio" Width="170px">
+                <NewCommandTemplate>
+                    <Button Color="Color.Success" Clicked="@context.Clicked">New</Button>
+                </NewCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Edit</Button>
+                </EditCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Save</Button>
+                </SaveCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Clicked="@context.Clicked">Delete</Button>
+                </DeleteCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Cancel</Button>
+                </CancelCommandTemplate>
+                <ClearFilterCommandTemplate>
+                    <Button Color="Color.Warning" Clicked="@context.Clicked">Clear Filter</Button>
+                </ClearFilterCommandTemplate>
+            </DataGridCommandColumn>
+
+            @*<DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.Id)" Caption="Portfolio ID" Editable="false" Filterable="false" Readonly="true" />*@
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.Title)" Caption="Portfolio Title" Editable="true" />
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.SubTitle)" Caption="Portfolio Sub Title" Editable="true" />
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.BackTitle)" Caption="Portfolio Back Title" Editable="true" />
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.Technologies)" Caption="Technologies" Editable="true" />
+
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.Body)" Caption="Front Card Body" Editable="true">
+                <EditTemplate>
+                    <MemoEdit Text="@((string)(((CellEditContext)context).CellValue))" TextChanged="@(v=>((CellEditContext)context).CellValue=v)" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.BackBody)" Caption="Back Card Description" Editable="true">
+                <EditTemplate>
+                    <MemoEdit Text="@((string)(((CellEditContext)context).CellValue))" TextChanged="@(v=>((CellEditContext)context).CellValue=v)" />
+                </EditTemplate>
+            </DataGridColumn>
+
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.PictureSrc)" Caption="Portfolio Picture" Editable="true" />
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.CirclePictureSrc)" Caption="Icon Picture" Editable="true" />
+
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.projectLink)" Caption="Project Link" Editable="true" />
+
+            <DataGridColumn TItem="Portfolio" Field="@nameof(Portfolio.PortfolioCategoryId)" Caption="Portfolio Category" Editable="true">
+                <DisplayTemplate>
+                    @{
+                        var catId = (context as Portfolio)?.PortfolioCategoryId;
+
+                        if (catId != null)
+                        {
+                            @portfolioCategories.First(x => x.PortfolioCategoryId == catId).CategoryName;
+
+                            @*@($"{date.Value.ToShortDateString()}, age: {( DateTime.Now.Year - date.Value.Year )}")*@
+                        }
+                    }
+
+
+                </DisplayTemplate>
+                <EditTemplate>
+                    <SelectEdit TValue="Guid" @bind-SelectedValue="selectedPortfolioCategoryId">
+
+                            @foreach (PortfolioCategory item in portfolioCategories)
+                            {
+                                <SelectItem Value="@item.PortfolioCategoryId"> @item.CategoryName </SelectItem>
+                            }
+
+                        </SelectEdit>
+                </EditTemplate>
+            </DataGridColumn>
+
+        </DataGrid>
+    </div>
+</div>
+
+
+@code {
+
+    List<Portfolio> portfolios = new List<Portfolio>();
+
+    Portfolio selectedPortfolio = new Portfolio();
+
+    List<PortfolioCategory> portfolioCategories = new List<PortfolioCategory>();
+
+    Guid selectedPortfolioCategoryId = new Guid();
+
+    protected override Task OnInitializedAsync()
+    {
+        GetPortfoliosData();
+        GetPortfolioCategories();
+        return base.OnInitializedAsync();
+    }
+
+    protected void GetPortfoliosData()
+    {
+        portfolios = PortfolioService.GetPortfolios();
+        StateHasChanged();
+    }
+
+    protected void GetPortfolioCategories()
+    {
+        portfolioCategories = PortfolioCategoryService.GetPortfolioCategorys();
+        selectedPortfolioCategoryId = portfolioCategories.First().PortfolioCategoryId;
+
+        StateHasChanged();
+    }
+
+    protected async void OnRowInserting(CancellableRowChange<Portfolio, Dictionary<string, object>> e)
+    {
+        var portfolio = new Portfolio(e.Item);
+
+        portfolio.Title = (string)e.Values["Title"];
+        portfolio.SubTitle = (string)e.Values["SubTitle"];
+        portfolio.BackTitle = (string)e.Values["BackTitle"];
+        portfolio.Body = (string)e.Values["Body"];
+        portfolio.BackBody = (string)e.Values["BackBody"];
+        portfolio.PictureSrc = (string)e.Values["PictureSrc"];
+        portfolio.CirclePictureSrc = (string)e.Values["CirclePictureSrc"];
+        portfolio.Technologies = (string)e.Values["Technologies"];
+        portfolio.projectLink = (string)e.Values["projectLink"];
+        portfolio.PortfolioCategoryId = selectedPortfolioCategoryId;
+
+        e.Values["Id"] = await PortfolioService.AddPortfolio(portfolio);
+        if ((Guid)e.Values["Id"] == Guid.Empty)
+            e.Cancel = true;
+        else
+            portfolios.Add(e.Item);
+
+        GetPortfoliosData();
+    }
+
+    protected async void OnRowUpdating(CancellableRowChange<Portfolio, Dictionary<string, object>> e)
+    {
+        var portfolio = new Portfolio(e.Item);
+
+        portfolio.Title = (string)e.Values["Title"];
+        portfolio.SubTitle = (string)e.Values["SubTitle"];
+        portfolio.BackTitle = (string)e.Values["BackTitle"];
+        portfolio.Body = (string)e.Values["Body"];
+        portfolio.BackBody = (string)e.Values["BackBody"];
+        portfolio.PictureSrc = (string)e.Values["PictureSrc"];
+        portfolio.CirclePictureSrc = (string)e.Values["CirclePictureSrc"];
+        portfolio.Technologies = (string)e.Values["Technologies"];
+        portfolio.projectLink = (string)e.Values["projectLink"];
+        portfolio.PortfolioCategoryId = selectedPortfolioCategoryId;
+
+        if (await PortfolioService.UpdatePortfolio(portfolio))
+        {
+            // Todo : Show message Done
+            GetPortfoliosData();
+            e.Cancel = false;
+        }
+        else
+        {
+            e.Cancel = true;
+        }
+    }
+
+    protected async void OnRowRemoving(CancellableRowChange<Portfolio> model)
+    {
+        if (portfolios.Contains(model.Item))
+        {
+            if (await PortfolioService.RemovePortfolio(model.Item))
+            {
+                // Todo : Done
+                model.Cancel = false;
+                portfolios.Remove(model.Item);
+            }
+            else
+            {
+                model.Cancel = true;
+            }
+
+            GetPortfoliosData();
+
+        }
+
+    }
+
+}

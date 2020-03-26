@@ -43,6 +43,8 @@ namespace Askianoor.AdminPanel
             services.AddScoped<NavbarService>();
             services.AddScoped<EducationService>();
             services.AddScoped<ExperienceService>();
+            services.AddScoped<PortfolioService>();
+            services.AddScoped<PortfolioCategoryService>();
 
             //Inject AppSettings
             services.Configure<ApplicationSettings>(Configuration.GetSection("ApplicationSettings"));

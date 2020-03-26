@@ -76,7 +76,7 @@
                         <FieldLabel>HomePage Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Role="TextRole.Url" Placeholder="Enter HomePage Image URL" @bind-Text="@DashboardSetting.HomePageImage">
+                                <TextEdit Placeholder="Enter HomePage Image URL" @bind-Text="@DashboardSetting.HomePageImage">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid HomePage Image URL</ValidationNone>
                                         <ValidationError>Please enter a valid HomePage Image URL!</ValidationError>

@@ -10,5 +10,18 @@ namespace Askianoor.AdminPanel.Data.Models
         public Guid PortfolioCategoryId { get; set; }
 
         public string CategoryName { get; set; }
+
+        public PortfolioCategory()
+        {
+            PortfolioCategoryId = new Guid();
+            CategoryName = "";
+
+        }
+
+        public PortfolioCategory(PortfolioCategory portfolioCategory)
+        {
+            PortfolioCategoryId = portfolioCategory.PortfolioCategoryId;
+            CategoryName = portfolioCategory.CategoryName;
+        }
     }
 }
