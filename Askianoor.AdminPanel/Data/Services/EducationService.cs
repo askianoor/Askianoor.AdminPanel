@@ -6,23 +6,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Askianoor.AdminPanel.Data
 {
-    public class ExperienceService
+    public class EducationService
     {
         private readonly ISessionStorageService _localStorageService;
         private readonly ApplicationSettings _appSettings;
 
-        public ExperienceService(ISessionStorageService localStorageService, IOptions<ApplicationSettings> appSettings)
+        public EducationService(ISessionStorageService localStorageService, IOptions<ApplicationSettings> appSettings)
         {
             _localStorageService = localStorageService;
             _appSettings = appSettings.Value;
         }
 
-        public async Task<List<Experience>> GetExperiences()
+        public async Task<List<Education>> GetEducations()
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
@@ -37,63 +38,67 @@ namespace Askianoor.AdminPanel.Data
                 //var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP GET
-                var responseTask = client.GetAsync(_appSettings.BaseAPIUri + "/Experiences");
+                var responseTask = client.GetAsync(_appSettings.BaseAPIUri + "/Educations");
                 responseTask.Wait();
 
                 var result = responseTask.Result;
                 if (result.IsSuccessStatusCode)
                 {
                     var responseString = result.Content.ReadAsStringAsync();
-                    return JsonConvert.DeserializeObject<List<Experience>>(responseString.Result);
+                    return JsonConvert.DeserializeObject<List<Education>>(responseString.Result);
                 }
             }
             return null;
         }
 
 
-        public async Task<Guid> AddExperience(Experience experience)
+        public async Task<Guid> AddEducation(Education education)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
             if (string.IsNullOrEmpty(Token))
                 return new Guid();
 
-            //var body = new { experience , Token };
+            //var body = new { education , Token };
 
             using (var client = new HttpClient())
             {
-                var json = JsonConvert.SerializeObject(experience);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
+                var json = JsonConvert.SerializeObject(education);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP Post
-                var responseTask = client.PostAsync(_appSettings.BaseAPIUri + "/Experiences", stringContent);
+                var responseTask = client.PostAsync(_appSettings.BaseAPIUri + "/Educations", stringContent);
                 responseTask.Wait();
 
                 var result = responseTask.Result;
                 if (result.IsSuccessStatusCode)
                 {
                     var responseString = result.Content.ReadAsStringAsync();
-                    var resObject = JsonConvert.DeserializeObject<Experience>(responseString.Result);
-                    return resObject.ExperienceId;
+                    var resObject = JsonConvert.DeserializeObject<Education>(responseString.Result);
+                    return resObject.EducationId;
                 }
             }
             return new Guid();
         }
 
-        public async Task<bool> UpdateExperience(Experience experience)
+        public async Task<bool> UpdateEducation(Education education)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
-            if (string.IsNullOrEmpty(Token) || experience.ExperienceId == Guid.Empty)
+            if (string.IsNullOrEmpty(Token) || education.EducationId == Guid.Empty)
                 return false;
 
             using (var client = new HttpClient())
             {
-                var json = JsonConvert.SerializeObject(experience);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
+                var json = JsonConvert.SerializeObject(education);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
                 //HTTP Post
-                var responseTask = client.PutAsync(_appSettings.BaseAPIUri + "/Experiences/" + experience.ExperienceId, stringContent);
+                var responseTask = client.PutAsync(_appSettings.BaseAPIUri + "/Educations/" + education.EducationId, stringContent);
                 responseTask.Wait();
 
                 var result = responseTask.Result;
@@ -106,17 +111,19 @@ namespace Askianoor.AdminPanel.Data
         }
 
 
-        public async Task<bool> RemoveExperience(Experience experience)
+        public async Task<bool> RemoveEducation(Education education)
         {
             string Token = await _localStorageService.GetItemAsync<string>("Token");
 
-            if (string.IsNullOrEmpty(Token) || experience.ExperienceId == Guid.Empty)
+            if (string.IsNullOrEmpty(Token) || education.EducationId == Guid.Empty)
                 return false;
 
             using (var client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
                 //HTTP Delete
-                var responseTask = client.DeleteAsync(_appSettings.BaseAPIUri + "/Experiences/" + experience.ExperienceId);
+                var responseTask = client.DeleteAsync(_appSettings.BaseAPIUri + "/Educations/" + education.EducationId);
                 responseTask.Wait();
 
                 var result = responseTask.Result;
