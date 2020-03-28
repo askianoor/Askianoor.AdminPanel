@@ -151,7 +151,9 @@
                             </button>
                         </ToolbarContent>
                         <EditorContent>
-                            @((MarkupString)DashboardSetting.AboutMeDescription)
+                            @if(!string.IsNullOrEmpty(AboutMeContent))
+                                @((MarkupString)AboutMeContent)
+                            @*@((MarkupString)DashboardSetting.AboutMeDescription)*@
                         </EditorContent>
                     </BlazoredTextEditor>
 
@@ -203,7 +205,9 @@
                             </button>
                         </ToolbarContent>
                         <EditorContent>
-                            @((MarkupString)DashboardSetting.FooterText)
+                            @if (!string.IsNullOrEmpty(FooterContent))
+                                @((MarkupString)FooterContent)
+                                @*@((MarkupString)DashboardSetting.FooterText)*@
                         </EditorContent>
                     </BlazoredTextEditor>
                 </TabPanel>
@@ -242,6 +246,9 @@
     private FileManagerDialog FooterFileManagerControl;
 
     bool rawHtmlFormat = false;
+
+    string AboutMeContent = "";
+    string FooterContent = "";
 
     protected override Task OnInitializedAsync()
     {
@@ -303,6 +310,11 @@
         DashboardSetting = await DashboardSettingService.GetDashboardSettings();
         if (DashboardSetting != null)
         {
+            AboutMeContent = DashboardSetting.AboutMeDescription;
+            FooterContent = DashboardSetting.FooterText;
+
+            //await this.QuillHtmlAboutMe.LoadHTMLContent(AboutMeContent);
+            //await this.QuillHtmlFooter.LoadHTMLContent(FooterContent);
             StateHasChanged();
         }
     }

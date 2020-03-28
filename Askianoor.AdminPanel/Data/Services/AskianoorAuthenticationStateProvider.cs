@@ -70,32 +70,42 @@ namespace Askianoor.AdminPanel.Data
 
             var body = new { Username, Password };
 
-            using (var client = new HttpClient())
+            try
             {
-                var json = JsonConvert.SerializeObject(body);
-                var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
-
-                //HTTP GET
-                var responseTask = client.PostAsync(_appSettings.BaseAPIUri + "/AppUser/login", stringContent);
-                responseTask.Wait();
-
-                var result = responseTask.Result;
-                if (result.IsSuccessStatusCode)
+                using (var client = new HttpClient())
                 {
-                    var responseString = result.Content.ReadAsStringAsync();
-                    var response = JsonConvert.DeserializeObject<LoginResponse>(responseString.Result);
+                    var json = JsonConvert.SerializeObject(body);
+                    var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
-                    _localStorageService.SetItemAsync("Token", response.accessToken);
-                    _localStorageService.SetItemAsync("Username", Username);
+                    //HTTP GET
+                    var responseTask = client.PostAsync(_appSettings.BaseAPIUri + "/AppUser/login", stringContent);
+                    responseTask.Wait();
 
-                    status.isSuccesful = true;
-                    status.MessageTitle = "Authentication Succesful";
-                    status.MessageDescription = "Welcome to the Admin Panel";
-                    status.MessageType = "success";
+                    var result = responseTask.Result;
+                    if (result.IsSuccessStatusCode)
+                    {
+                        var responseString = result.Content.ReadAsStringAsync();
+                        var response = JsonConvert.DeserializeObject<LoginResponse>(responseString.Result);
 
-                    return status;
+                        _localStorageService.SetItemAsync("Token", response.accessToken);
+                        _localStorageService.SetItemAsync("Username", Username);
+
+                        status.isSuccesful = true;
+                        status.MessageTitle = "Authentication Succesful";
+                        status.MessageDescription = "Welcome to the Admin Panel";
+                        status.MessageType = "success";
+
+                        return status;
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                status.MessageTitle = "System Error";
+                status.MessageDescription = ex.ToString();
+                return status;
+            }
+
             return status;
         }
 
