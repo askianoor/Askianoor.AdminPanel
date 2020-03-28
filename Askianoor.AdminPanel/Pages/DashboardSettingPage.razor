@@ -31,7 +31,7 @@
                         <FieldLabel>Website Title</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Placeholder="Enter Website Title" @bind-Text="@DashboardSetting.WebsiteTitle">
+                                <TextEdit Placeholder="Enter Website Title" @bind-Text="@dashboardSetting.WebsiteTitle">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid Website Title</ValidationNone>
                                         <ValidationError>Please enter a valid Website Title!</ValidationError>
@@ -45,7 +45,7 @@
                         <FieldLabel>Website Header</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <MemoEdit Rows="5" Placeholder="Enter Website Header" @bind-Text="@DashboardSetting.WebsiteHeader">
+                                <MemoEdit Rows="5" Placeholder="Enter Website Header" @bind-Text="@dashboardSetting.WebsiteHeader">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid Website Header</ValidationNone>
                                         <ValidationError>Please enter a valid Website Header!</ValidationError>
@@ -62,7 +62,7 @@
                         <FieldLabel>HomePage Text</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Placeholder="Enter HomePage Text" @bind-Text="@DashboardSetting.HomePageText">
+                                <TextEdit Placeholder="Enter HomePage Text" @bind-Text="@dashboardSetting.HomePageText">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid HomePage Text</ValidationNone>
                                         <ValidationError>Please enter a valid HomePage Text!</ValidationError>
@@ -76,7 +76,7 @@
                         <FieldLabel>HomePage Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Placeholder="Enter HomePage Image URL" @bind-Text="@DashboardSetting.HomePageImage">
+                                <TextEdit Placeholder="Enter HomePage Image URL" @bind-Text="@dashboardSetting.HomePageImage">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid HomePage Image URL</ValidationNone>
                                         <ValidationError>Please enter a valid HomePage Image URL!</ValidationError>
@@ -93,7 +93,7 @@
                         <FieldLabel>Owner Name</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Placeholder="Enter Owner Name" @bind-Text="@DashboardSetting.OwnerName">
+                                <TextEdit Placeholder="Enter Owner Name" @bind-Text="@dashboardSetting.OwnerName">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid Owner Name</ValidationNone>
                                         <ValidationError>Please enter a valid Owner Name!</ValidationError>
@@ -107,7 +107,7 @@
                         <FieldLabel>Owner Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@DashboardSetting.OwnerPictureSrc">
+                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@dashboardSetting.OwnerPictureSrc">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid Owner Image URL</ValidationNone>
                                         <ValidationError>Please enter a valid Owner Image URL!</ValidationError>
@@ -161,7 +161,7 @@
                         <FieldLabel>About Me Image</FieldLabel>
                         <FieldBody>
                             <Validation Validator="@ValidationRule.IsNotEmpty">
-                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@DashboardSetting.AboutMeImage">
+                                <TextEdit Role="TextRole.Url" Placeholder="Enter Owner Image URL" @bind-Text="@dashboardSetting.AboutMeImage">
                                     <Feedback>
                                         <ValidationNone>Please enter a valid About me Image URL</ValidationNone>
                                         <ValidationError>Please enter a valid About me Image URL!</ValidationError>
@@ -232,7 +232,7 @@
 
 @code {
 
-    DashboardSetting DashboardSetting = new DashboardSetting();
+    DashboardSetting dashboardSetting = new DashboardSetting();
 
     BlazoredTextEditor QuillHtmlAboutMe = new BlazoredTextEditor();
     BlazoredTextEditor QuillHtmlFooter = new BlazoredTextEditor();
@@ -264,7 +264,7 @@
 
     public async void GetAboutMeHTML()
     {
-        DashboardSetting.AboutMeDescription = await this.QuillHtmlAboutMe.GetHTML();
+        dashboardSetting.AboutMeDescription = await this.QuillHtmlAboutMe.GetHTML();
     }
 
     public void HtmlContentToggle()
@@ -307,11 +307,11 @@
 
     protected async void GetDashboardSettingsData()
     {
-        DashboardSetting = await DashboardSettingService.GetDashboardSettings();
-        if (DashboardSetting != null)
+        dashboardSetting = await DashboardSettingService.GetDashboardSettings();
+        if (dashboardSetting != null)
         {
-            AboutMeContent = DashboardSetting.AboutMeDescription;
-            FooterContent = DashboardSetting.FooterText;
+            AboutMeContent = dashboardSetting.AboutMeDescription;
+            FooterContent = dashboardSetting.FooterText;
 
             //await this.QuillHtmlAboutMe.LoadHTMLContent(AboutMeContent);
             //await this.QuillHtmlFooter.LoadHTMLContent(FooterContent);
@@ -324,10 +324,11 @@
 
         if (validations.ValidateAll())
         {
-            bool result = await DashboardSettingService.UpdateDashboardSetting(DashboardSetting);
+            bool result = await DashboardSettingService.UpdateDashboardSetting(dashboardSetting);
             if (result)
             {
                 // TODO : Successful Message
+                GetDashboardSettingsData();
             }
             else
             {
@@ -341,19 +342,19 @@
         }
     }
 
-    protected async void OnRowUpdating(DashboardSetting dashboardSetting)
-    {
+    //protected async void OnRowUpdating(DashboardSetting dashboardSetting)
+    //{
 
-        if (await DashboardSettingService.UpdateDashboardSetting(dashboardSetting))
-        {
-            // Todo : Show message Done
-            GetDashboardSettingsData();
-        }
-        else
-        {
-            // Todo : Show Failed message 
-        }
-    }
+    //    if (await DashboardSettingService.UpdateDashboardSetting(dashboardSetting))
+    //    {
+    //        // Todo : Show message Done
+    //        GetDashboardSettingsData();
+    //    }
+    //    else
+    //    {
+    //        // Todo : Show Failed message 
+    //    }
+    //}
 
     //protected async void OnRowInserting(CancellableRowChange<DashboardSetting, Dictionary<string, object>> e)
     //{
