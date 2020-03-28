@@ -9,5 +9,8 @@ namespace Askianoor.AdminPanel.Data
     {
         public string BaseAPIUri { get; set; }
         public string ServerURL { get; set; }
+
+        public string SecretKey { get; set; }
+        public string SiteKey { get; set; }
     }
 }

@@ -109,5 +109,37 @@ namespace Askianoor.AdminPanel.Data
             return status;
         }
 
+        public Status ValidateRecaptcha(string gResponse)
+        {
+            Status status = new Status();
+            status.isSuccesful = false;
+            status.MessageType = "Danger";
+            status.MessageTitle = "Authentication Error";
+            status.MessageDescription = "The submission failed the spam bot verification. If you have JavaScript disabled in your browser, please enable it and try again.";
+
+            using (var client = new System.Net.WebClient())
+            {
+                try
+                {
+                    string secretKey = _appSettings.SecretKey;
+                    var gReply = client.DownloadString(string.Format("https://www.google.com/recaptcha/api/siteverify?secret={0}&response={1}", secretKey, gResponse));
+
+                    var jsonReturned = JsonConvert.DeserializeObject<ReCaptcha>(gReply);
+                    if (jsonReturned.Success.ToLower() == "true")
+                    {
+                        status.isSuccesful = true;
+                        status.MessageTitle = "Authentication Succesful";
+                        status.MessageDescription = "Welcome to the Admin Panel";
+                        status.MessageType = "success";
+                    }
+                    return status;
+                }
+                catch (Exception)
+                {
+                    return status;
+                    throw;
+                }
+            }
+        }
     }
 }

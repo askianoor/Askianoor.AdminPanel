@@ -49,14 +49,19 @@
 
 
 @code {
+    private User user;
 
-    protected override void OnAfterRender(bool firstRender)
+    protected override async void OnAfterRender(bool firstRender)
     {
         if (firstRender)
-            JSRuntime.InvokeVoidAsync("TitlReady");
+        {
+            await JSRuntime.InvokeVoidAsync("TitlReady");
+            user.googleRecaptcha = await JSRuntime.InvokeAsync<string>("runCaptcha");
+            StateHasChanged();
+        }
+
     }
 
-    private User user;
 
     protected override Task OnInitializedAsync()
     {
@@ -67,19 +72,31 @@
 
     private async Task<bool> ValidateUser()
     {
-        Status LoginStatus = ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).ValidateUser(user.Username, user.Password);
-        if (LoginStatus.isSuccesful)
-        {
-            ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Username);
+        Status RecaptchaStatus = ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).ValidateRecaptcha(user.googleRecaptcha);
 
-            NavigationManager.NavigateTo("/");
-            toastService.ShowSuccess(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
+        if (RecaptchaStatus.isSuccesful)
+        {
+            Status LoginStatus = ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).ValidateUser(user.Username, user.Password);
+            if (LoginStatus.isSuccesful)
+            {
+                ((AskianoorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(user.Username);
+
+                NavigationManager.NavigateTo("/");
+                toastService.ShowSuccess(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
+            }
+            else
+            {
+                toastService.ShowError(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
+                return await Task.FromResult(true);
+            }
         }
         else
         {
-            toastService.ShowError(LoginStatus.MessageDescription, LoginStatus.MessageTitle);
+            toastService.ShowError(RecaptchaStatus.MessageDescription, RecaptchaStatus.MessageTitle);
             return await Task.FromResult(true);
         }
+
         return await Task.FromResult(true);
     }
+
 }
