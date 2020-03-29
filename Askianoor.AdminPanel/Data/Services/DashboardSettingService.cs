@@ -34,8 +34,6 @@ namespace Askianoor.AdminPanel.Data
 
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-
                 //var json = JsonConvert.SerializeObject(body);
                 //var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
@@ -67,6 +65,8 @@ namespace Askianoor.AdminPanel.Data
                 var json = JsonConvert.SerializeObject(dashboardSetting);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
                 //HTTP Post
                 var responseTask = client.PostAsync(_appSettings.BaseAPIUri + "/DashboardSettings", stringContent);
                 responseTask.Wait();
@@ -94,6 +94,8 @@ namespace Askianoor.AdminPanel.Data
                 var json = JsonConvert.SerializeObject(dashboardSetting);
                 var stringContent = new StringContent(json, UnicodeEncoding.UTF8, "application/json");
 
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
                 //HTTP Post
                 var responseTask = client.PutAsync(_appSettings.BaseAPIUri + "/DashboardSettings/" + dashboardSetting.Id, stringContent);
                 responseTask.Wait();
@@ -116,6 +118,8 @@ namespace Askianoor.AdminPanel.Data
 
             using (var client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
                 //HTTP Delete
                 var responseTask = client.DeleteAsync(_appSettings.BaseAPIUri + "/DashboardSettings/" + dashboardSetting.Id);
                 responseTask.Wait();

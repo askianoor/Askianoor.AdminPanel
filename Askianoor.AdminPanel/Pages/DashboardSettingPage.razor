@@ -267,6 +267,12 @@
         dashboardSetting.AboutMeDescription = await this.QuillHtmlAboutMe.GetHTML();
     }
 
+    public async void GetFooterHTML()
+    {
+        dashboardSetting.FooterText = await this.QuillHtmlFooter.GetHTML();
+    }
+
+
     public void HtmlContentToggle()
     {
         rawHtmlFormat = rawHtmlFormat ? false : true;
@@ -324,6 +330,9 @@
 
         if (validations.ValidateAll())
         {
+            GetAboutMeHTML();
+            GetFooterHTML();
+
             bool result = await DashboardSettingService.UpdateDashboardSetting(dashboardSetting);
             if (result)
             {
