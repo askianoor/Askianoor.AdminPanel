@@ -16,6 +16,7 @@ using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components.Authorization;
 using Blazored.Toast;
+using Microsoft.CodeAnalysis.Options;
 
 namespace Askianoor.AdminPanel
 {
@@ -52,7 +53,7 @@ namespace Askianoor.AdminPanel
             services.AddCors();
             services.AddBlazoredSessionStorage();
 
-            services.AddBlazorise(options => { options.ChangeTextOnKeyPress = true; })
+            services.AddBlazorise(options => { options.ChangeTextOnKeyPress = false; })
                 .AddBootstrapProviders()
                 .AddFontAwesomeIcons();
 
